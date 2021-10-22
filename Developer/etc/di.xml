@@ -1,15 +1,5 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-
-    <type name="Magento\Developer\Model\View\Page\Config\RendererFactory">
-        <arguments>
-            <argument name="rendererTypes" xsi:type="array">
-                
-                <item name="add_timestamp_for_css_url" xsi:type="string">Betagento\Developer\View\Page\Config\Renderer</item>
-
-            </argument>
-        </arguments>
-    </type>
-
+    
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
