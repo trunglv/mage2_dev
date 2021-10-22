@@ -4,7 +4,7 @@
         <arguments>
             <argument name="rendererTypes" xsi:type="array">
                 
-                <item name="server_side_compilation" xsi:type="string">Betagento\Developer\View\Page\Config\Renderer</item>
+                <item name="add_timestamp_for_css_url" xsi:type="string">Betagento\Developer\View\Page\Config\Renderer</item>
 
             </argument>
         </arguments>
