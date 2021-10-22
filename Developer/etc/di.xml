@@ -1,0 +1,21 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <type name="Magento\Developer\Model\View\Page\Config\RendererFactory">
+        <arguments>
+            <argument name="rendererTypes" xsi:type="array">
+                
+                <item name="server_side_compilation" xsi:type="string">Betagento\Developer\View\Page\Config\Renderer</item>
+
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+               <item name="build_static_file" xsi:type="object">Betagento\Developer\Console\DeployStaticFile</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>    
