@@ -11,6 +11,10 @@ use Symfony\Component\Console\Input\InputOption;
 
 class DeployStaticFile extends Command {
 
+    const FILE_PATH = 'file_path';
+    const THEME_PATH = 'theme_path';
+    const MODULE_NAME = 'module_name';
+    const LOCALE_CODE = 'locale_code';
     /**
      * Constructor function
      *
@@ -55,26 +59,26 @@ class DeployStaticFile extends Command {
         
         $options = [
 			new InputOption(
-				'file',
-				'f',
+				self::FILE_PATH,
+				'-f',
 				InputOption::VALUE_REQUIRED,
 				"File Path: --f js/view/shipping-address/address-renderer/default.js"
             ),
             new InputOption(
-				'theme_path',
-				't',
+				self::THEME_PATH,
+				'-t',
 				InputOption::VALUE_REQUIRED,
 				'Theme path: --t Magento/luna'
             ),
             new InputOption(
-				'module_name',
-				'm',
+				self::MODULE_NAME,
+				'-m',
 				InputOption::VALUE_OPTIONAL,
 				'Module name: --m Magento_Checkout'
             ),
             new InputOption(
-				'locale_code',
-				'l',
+				self::LOCALE_CODE,
+				'-l',
 				InputOption::VALUE_OPTIONAL,
 				'Locale code: --l da_DK '
 			)
@@ -88,12 +92,12 @@ class DeployStaticFile extends Command {
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         
-        if (($file = $input->getOption('f')) && ($themeName = $input->getOption('t'))) {
+        if (($file = $input->getOption(self::FILE_PATH)) && ($themeName = $input->getOption(self::THEME_PATH))) {
             $languageCodes = $this->storeView->retrieveLocales();
             
             $this->state->setAreaCode('frontend');
             foreach($languageCodes as $languageCode){
-                $languageInput = $input->getOption('l');
+                $languageInput = $input->getOption(self::LOCALE_CODE);
                 if($languageInput && $languageInput != $languageCode){
                     continue;
                 }
@@ -101,7 +105,7 @@ class DeployStaticFile extends Command {
                     'area' => 'frontend',
                     'theme' => $themeName,
                     'locale' => $languageCode,
-                    'module' =>  $input->getOption('m') ? $input->getOption('m') : ''
+                    'module' =>  $input->getOption(self::MODULE_NAME) ? $input->getOption(self::MODULE_NAME) : ''
                 ];
                 
                 $this->objectManager->configure($this->configLoader->load($params['area']));
