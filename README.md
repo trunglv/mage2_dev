@@ -1,6 +1,6 @@
 # mage2_dev
 ## Quick tools for Magento 2 Development and Deployment:
-### 1. Buid/Deploy CSS/Javascript Files
+### 1. Build/Deploy CSS/Javascript Files
 Example : 
 > bin/magento beta_dev:deploy_static -m Magento_Checkout -f js/view/shipping-address/address-renderer/default.js -t Magento/luna
 
