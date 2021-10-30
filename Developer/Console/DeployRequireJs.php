@@ -13,7 +13,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Magento\Deploy\Service\DeployRequireJsConfig;
 
 
+
+
 class DeployRequireJs extends Command {
+
+    const THEME_PATH = 'theme_path'; 
+
+    const LOCALE_CODE = 'locale_code'; 
 
     /**
      * Constructor
@@ -55,14 +61,14 @@ class DeployRequireJs extends Command {
         
         $options = [
             new InputOption(
-				'theme_path',
-				't',
+				self::THEME_PATH,
+				'-t',
 				InputOption::VALUE_REQUIRED,
 				'Theme path: --t Magento/luna'
             ),
             new InputOption(
-				'locale_code',
-				'l',
+				self::LOCALE_CODE,
+				'-l',
 				InputOption::VALUE_OPTIONAL,
 				'Locale code: --l da_DK '
 			)
@@ -76,18 +82,18 @@ class DeployRequireJs extends Command {
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         
-        if ($themePath = $input->getOption('t')) {
+        if ($themePath = $input->getOption(self::THEME_PATH)) {
             $output->writeln($themePath);
             $languageCodes = $this->storeView->retrieveLocales();
             $this->state->setAreaCode('frontend');
             foreach($languageCodes as $languageCode){
-                $languageInput = $input->getOption('l');
+                $languageInput = $input->getOption(self::LOCALE_CODE);
                 if($languageInput && $languageInput != $languageCode){
                     continue;
                 }
                 $this->objectManager->configure($this->configLoader->load('frontend'));
                 $this->deployRequireJsConfig->deploy('frontend', $themePath, $languageCode);
-                $output->writeln("Done -- ". $languageCode. "-- theme: ". $themePath);
+                $output->writeln("Deployed requirejs-config.js -- ". $languageCode. "-- theme: ". $themePath);
                 //exit;
             }
 
