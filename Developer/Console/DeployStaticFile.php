@@ -55,41 +55,42 @@ class DeployStaticFile extends Command {
         
         $options = [
 			new InputOption(
+				'file',
 				'f',
-				null,
 				InputOption::VALUE_REQUIRED,
-				"File Path -- example: --f js/view/shipping-address/address-renderer/default.js"
+				"File Path: --f js/view/shipping-address/address-renderer/default.js"
             ),
             new InputOption(
+				'theme_path',
 				't',
-				null,
-				InputArgument::VALUE_REQUIRED,
-				'Theme -- example : --t Magento/luna'
+				InputOption::VALUE_REQUIRED,
+				'Theme path: --t Magento/luna'
             ),
             new InputOption(
+				'module_name',
 				'm',
-				null,
-				InputArgument::OPTIONAL,
-				'Module name : --m Magento_Checkout'
+				InputOption::VALUE_OPTIONAL,
+				'Module name: --m Magento_Checkout'
             ),
             new InputOption(
+				'locale_code',
 				'l',
-				null,
-				InputArgument::OPTIONAL,
-				'Language : --l da_DK '
+				InputOption::VALUE_OPTIONAL,
+				'Locale code: --l da_DK '
 			)
         ];
         
         $this->setName('beta_dev:deploy_static');
-        $this->setDescription('Quickly build js/css files');
+        $this->setDescription('Deploy a static file');
         $this->setDefinition($options);
         parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         
-        if ($file = $input->getOption('f') && $themeName = $input->getOption('t')) {
+        if (($file = $input->getOption('f')) && ($themeName = $input->getOption('t'))) {
             $languageCodes = $this->storeView->retrieveLocales();
+            
             $this->state->setAreaCode('frontend');
             foreach($languageCodes as $languageCode){
                 $languageInput = $input->getOption('l');
@@ -110,10 +111,9 @@ class DeployStaticFile extends Command {
                 if ($dir->isExist($asset->getPath())) {
                     //$asset->getPath()
                     $absolutePath = $dir->getAbsolutePath($asset->getPath());
-                    unlink($absolutePath);
+                    @unlink($absolutePath);
                     //$output->writeln('Delete a file : '.$absolutePath);
                 }
-    
                 $this->publisher->publish($asset);
                 $output->writeln("Done -- ". $absolutePath);
                 //exit;
