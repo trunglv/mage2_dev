@@ -33,7 +33,8 @@ Example:
 bin/magento  beta_dev:deploy_requirejs -f Magento/luna
 ```
 
-## Other tools to fix 
+## Other tools
+
 ### 1. Build a order grid table ( For missing orders and missing data in existed items ) 
 Example:
 #### Build for all missing orders 
