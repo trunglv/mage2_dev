@@ -43,7 +43,7 @@ Example:
 sudo bin/magento beta_dev:build_order_grid --missing-orders true
 
 ```
-#### Build for a specific order -- In case you want to refresh just one item due to it just misses a few fields. 
+#### Build for a specific order -- In case you want to refresh just one item due to just missing a few fields. 
 
 ```
 sudo bin/magento beta_dev:build_order_grid --missing-orders [order_id]
