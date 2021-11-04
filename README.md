@@ -9,7 +9,7 @@ I think, This extension/project will help developers save time in developement a
 ```
    bin/magento  beta_dev:deploy_requirejs -t Magento/luna
 ```
-- Deploy your mixin to pub/static folder
+- Deploy your mixin file to pub/static folder
 ```
 
 bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [your_theme]
