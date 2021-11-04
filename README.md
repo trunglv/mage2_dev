@@ -16,7 +16,7 @@ bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [
 
 ```
 
-## Deploy static files ( Javascript, Css, Js-translation, requirejs-config.js )
+## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
 ### 1. Build/Deploy CSS/Javascript Files
 ```
 bin/magento beta_dev:deploy_static -m Magento_Checkout -f js/view/shipping-address/address-renderer/default.js -t Magento/luna
