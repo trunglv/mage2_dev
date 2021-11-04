@@ -62,7 +62,7 @@ class BuildOrderGrid extends Command {
             }
 
 		} else {
-			$output->writeln("Please provide theme path");
+			$output->writeln("Please read a guideline to use this command. Thank you!");
         }
            
     }
