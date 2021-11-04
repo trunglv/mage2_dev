@@ -35,14 +35,14 @@ bin/magento  beta_dev:deploy_requirejs -f Magento/luna
 
 ## Other tools
 
-### 1. Build a order grid table ( For missing orders and missing data in existed items ) 
+### 1. Build an order grid table ( For missing orders and missing data in existed items ) 
 Example:
 #### Build for all missing orders 
 ```
 sudo bin/magento beta_dev:build_order_grid --missing-orders true
 
 ```
-#### Build for a specific order -- In case you want to refresh just one item due to it just misses few fields. 
+#### Build for a specific order -- In case you want to refresh just one item due to it just misses a few fields. 
 
 ```
 sudo bin/magento beta_dev:build_order_grid --missing-orders [order_id]
