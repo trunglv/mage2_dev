@@ -3,7 +3,7 @@ Quick tools for Magento 2 Development and Deployment:
 
 I think, This extension/project will help developers save time in developement and deployment in any Magento2 project.
 
-###### We can enable a production mode on a local machine host, or DEV server (For saving time loading), And then just put only updated files to a pub/static folder. Example you want to test a mixin you are implementing, just use few commands
+#### We can enable a production mode on a local machine host, or DEV server (For saving time loading), And then just put only updated files to a pub/static folder. Example you want to test a mixin you are implementing, just use few commands
 - Push mixin configuration in a requirejs-config.js of your module.
 ```
    bin/magento  beta_dev:deploy_requirejs -t Magento/luna
