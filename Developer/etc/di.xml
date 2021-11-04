@@ -5,6 +5,7 @@
             <argument name="commands" xsi:type="array">
                 <item name="build_static_file" xsi:type="object">Betagento\Developer\Console\DeployStaticFile</item>
                 <item name="deploy_requirejs" xsi:type="object">Betagento\Developer\Console\DeployRequireJs</item>
+                <item name="build_order_grid_items" xsi:type="object">Betagento\Developer\Console\Order\BuildOrderGrid</item>
             </argument>
         </arguments>
     </type>
