@@ -41,12 +41,12 @@ bin/magento  beta_dev:deploy_requirejs -f Magento/luna
 Example:
 #### Build for all missing orders 
 ```
-sudo bin/magento beta_dev:build_order_grid --missing-orders true
+bin/magento beta_dev:build_order_grid --missing-orders true
 
 ```
 #### Build for a specific order -- In case you want to refresh just one item due to just missing a few fields. 
 
 ```
-sudo bin/magento beta_dev:build_order_grid --missing-orders [order_id]
+bin/magento beta_dev:build_order_grid --missing-orders [order_id]
 
 ```
