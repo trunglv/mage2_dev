@@ -23,15 +23,10 @@ bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [
 ```
 bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSalableForRequestedQty"
 ```
-+------------------------------+--------------------+--------------------+--------------------------------------------------------------------+---------------+
-| code                         | original_method    | plugin_method_type | instance                                                           | method_exists |
-+------------------------------+--------------------+--------------------+--------------------------------------------------------------------+---------------+
-| catalogInventoryAfterLoad    | load               | after              | Magento\CatalogInventory\Model\Plugin\AfterProductLoad             | method is ok  |
-| product_identities_extender  | getIdentities      | after              | Magento\ConfigurableProduct\Model\Plugin\ProductIdentitiesExtender | method is ok  |
-| exclude_swatch_attribute     | getMediaAttributes | after              | Magento\Swatches\Model\Plugin\Product                              | method is ok  |
-| cms                          | getIdentities      | after              | Magento\Cms\Model\Plugin\Product                                   | method is ok  |
-| add_bundle_parent_identities | getIdentities      | after              | Magento\Bundle\Model\Plugin\ProductIdentitiesExtender              | method is ok  |
-+------------------------------+--------------------+--------------------+--------------------------------------------------------------------+---------------+
+![image](https://user-images.githubusercontent.com/820411/140596064-b3299395-16fe-40ef-8b2b-fc4d00a9d2d6.png)
+
+
+![image](https://user-images.githubusercontent.com/820411/140596086-56af8e1f-ba59-4a1c-86d5-c5afa4584480.png)
 
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
