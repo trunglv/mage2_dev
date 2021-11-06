@@ -3,6 +3,7 @@ Quick tools for Magento 2 Development and Deployment:
 
 I think, This extension/project will help developers save time in developement and deployment in any Magento2 project.
 
+
 #### We can enable a production mode on a local machine host, or DEV server (For saving time loading), And then just put only updated files to a pub/static folder.
 #### For example, you want to test a mixin you are implementing, just use a few commands.
 
@@ -16,6 +17,22 @@ I think, This extension/project will help developers save time in developement a
 bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [your_theme]
 
 ```
+
+## Debug tools
+### 1. List all plugins for a class
+```
+bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSalableForRequestedQty"
+```
++------------------------------+--------------------+--------------------+--------------------------------------------------------------------+---------------+
+| code                         | original_method    | plugin_method_type | instance                                                           | method_exists |
++------------------------------+--------------------+--------------------+--------------------------------------------------------------------+---------------+
+| catalogInventoryAfterLoad    | load               | after              | Magento\CatalogInventory\Model\Plugin\AfterProductLoad             | method is ok  |
+| product_identities_extender  | getIdentities      | after              | Magento\ConfigurableProduct\Model\Plugin\ProductIdentitiesExtender | method is ok  |
+| exclude_swatch_attribute     | getMediaAttributes | after              | Magento\Swatches\Model\Plugin\Product                              | method is ok  |
+| cms                          | getIdentities      | after              | Magento\Cms\Model\Plugin\Product                                   | method is ok  |
+| add_bundle_parent_identities | getIdentities      | after              | Magento\Bundle\Model\Plugin\ProductIdentitiesExtender              | method is ok  |
++------------------------------+--------------------+--------------------+--------------------------------------------------------------------+---------------+
+
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
 ### 1. Build/Deploy CSS/Javascript Files
