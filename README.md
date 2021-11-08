@@ -1,5 +1,4 @@
-# mage2_dev
-Quick Tool for Magento 2 Development and Deployment:
+# mage2_dev - CLI tools for Magento 2 Development and Deployment
 
 ## If you have any idea about a new stuff need to be added, pls contact me via email : luuvantrung@gmail.com or skype beta_trunglv! My pleasure!
 
