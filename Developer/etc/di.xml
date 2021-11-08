@@ -7,6 +7,7 @@
                 <item name="deploy_requirejs" xsi:type="object">Betagento\Developer\Console\DeployRequireJs</item>
                 <item name="build_order_grid_items" xsi:type="object">Betagento\Developer\Console\Order\BuildOrderGrid</item>
                 <item name="beta_show_plugins" xsi:type="object">Betagento\Developer\Console\Interception\ShowPlugins</item>
+                <item name="beta_show_observers" xsi:type="object">Betagento\Developer\Console\Observer\ShowObservers</item>
             </argument>
         </arguments>
     </type>
