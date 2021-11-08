@@ -81,9 +81,17 @@ class ShowObservers extends Command{
                     $output->writeln("<fire>Observers for scope {$scope} </>");
                     if(count($configs)){
                         $tableConfigs = array_map(function($data, $key){
+                            $instanceClass = new \ReflectionClass($data['instance']);
+                            if (!$instanceClass->implementsInterface('Magento\Framework\Event\ObserverInterface'))
+                            {
+                               $data['check'] = sprintf('must implement interface "ObserverInterface" ');
+                            }else{
+                                $data['check'] = 'ok';
+                            }
+
                             return $data;
                         }, $configs, array_keys($configs));
-                        
+
                         $table = new Table($output);
                         $table
                             ->setHeaders(array_keys( $tableConfigs[0]) )
