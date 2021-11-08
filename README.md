@@ -24,9 +24,13 @@ bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [
 
 ## Debug tools
 ### 1. List all plugins for a class
+Example:
 ```
 bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSalableForRequestedQty"
 ```
+
+Examples for results:
+
 ![image](https://user-images.githubusercontent.com/820411/140596064-b3299395-16fe-40ef-8b2b-fc4d00a9d2d6.png)
 
 
