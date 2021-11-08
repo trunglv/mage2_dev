@@ -21,6 +21,7 @@ bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [
 ## Installation
 
 ##### Clone and copy a source code into a folder app/code/Betagento 
+##### Just enable module and run DI Complile ( Magento developer will understand )
 
 ## Debug tools
 ### 1. List all plugins for a class
