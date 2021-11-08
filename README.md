@@ -49,6 +49,7 @@ Options:
 
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
+### Pls ensure you have delete the folder var/view_proccessed ( Some static files are cached in that folder)
 ### 1. Build/Deploy CSS/Javascript Files
 ```
 bin/magento beta_dev:deploy_static -m Magento_Checkout -f js/view/shipping-address/address-renderer/default.js -t Magento/luna
