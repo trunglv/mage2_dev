@@ -74,7 +74,7 @@ bin/magento  beta_dev:deploy_requirejs -t Magento/luna
 bin/magento  beta_dev:deploy_requirejs -t Magento/luna -f css/styles-l.css
 ```
 ```
-bin/magento  beta_dev:deploy_requirejs -t Magento/luna -f css/styles-.css
+bin/magento  beta_dev:deploy_requirejs -t Magento/luna -f css/styles-m.css
 ```
 
 ## Other tools
