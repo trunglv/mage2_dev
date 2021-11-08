@@ -28,6 +28,21 @@ bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSa
 
 ![image](https://user-images.githubusercontent.com/820411/140596086-56af8e1f-ba59-4a1c-86d5-c5afa4584480.png)
 
+### 2. List all observers for an event 
+```
+bin/magento beta_dev:show_observers -e catalog_product_get_final_price 
+```
+```
+Usage:
+  beta_dev:show_observers [options]
+
+Options:
+  -e, --event=EVENT              Event code : --e catalog_product_get_final_price
+  -s, --scope_code[=SCOPE_CODE]  Scope : -s global|frontend|adminhtml|crontab|webapi_rest|webapi_soap|graphql
+```
+
+![image](https://user-images.githubusercontent.com/820411/140691900-c3fe734b-4677-4a85-8a31-bdc036243c22.png)
+
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
 ### 1. Build/Deploy CSS/Javascript Files
