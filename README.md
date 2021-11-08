@@ -1,7 +1,7 @@
 # mage2_dev
-Quick tools for Magento 2 Development and Deployment:
+Quick Tool for Magento 2 Development and Deployment:
 
-## If you have any idea about new tool need to be added, pls contact me via email : luuvantrung@gmail.com or skype beta_trunglv! My pleasure!
+## If you have any idea about a new stuff need to be added, pls contact me via email : luuvantrung@gmail.com or skype beta_trunglv! My pleasure!
 
 I think, This extension/project will help developers save time in developement and deployment in any Magento2 project.
 
