@@ -43,7 +43,8 @@ Options:
   -s, --scope_code[=SCOPE_CODE]  Scope : -s global|frontend|adminhtml|crontab|webapi_rest|webapi_soap|graphql
 ```
 
-![image](https://user-images.githubusercontent.com/820411/140691900-c3fe734b-4677-4a85-8a31-bdc036243c22.png)
+![image](https://user-images.githubusercontent.com/820411/140692551-c3ed3ebe-8ed1-4a1b-9906-41e16ac4c7cd.png)
+
 
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
