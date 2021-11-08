@@ -83,12 +83,11 @@ class ShowObservers extends Command{
                         $tableConfigs = array_map(function($data, $key){
                             return $data;
                         }, $configs, array_keys($configs));
+                        
                         $table = new Table($output);
                         $table
                             ->setHeaders(array_keys( $tableConfigs[0]) )
-                            ->setRows(array_map(function($config){
-                                return $config;
-                            }, $tableConfigs ))
+                            ->setRows($tableConfigs);
                         ;
                         $table->render();
                     }else{
