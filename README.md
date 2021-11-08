@@ -18,6 +18,9 @@ I think, This project will help developers save time in developement and deploym
 bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [your_theme]
 
 ```
+## Installation
+
+##### Clone and copy a source code into a folder app/code/Betagento 
 
 ## Debug tools
 ### 1. List all plugins for a class
