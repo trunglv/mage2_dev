@@ -1,15 +1,26 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    
+
+  
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="build_static_file" xsi:type="object">Betagento\Developer\Console\DeployStaticFile</item>
-                <item name="deploy_requirejs" xsi:type="object">Betagento\Developer\Console\DeployRequireJs</item>
-                <item name="build_order_grid_items" xsi:type="object">Betagento\Developer\Console\Order\BuildOrderGrid</item>
-                <item name="beta_show_plugins" xsi:type="object">Betagento\Developer\Console\Interception\ShowPlugins</item>
-                <item name="beta_show_observers" xsi:type="object">Betagento\Developer\Console\Observer\ShowObservers</item>
+                <!-- Debug tools-->
+               <item name="beta_show_plugins" xsi:type="object">Betagento\Developer\Console\Interception\ShowPlugins</item>
+               <item name="beta_show_observers" xsi:type="object">Betagento\Developer\Console\Observer\ShowObservers</item>
+               <item name="beta_show_action_list" xsi:type="object">Betagento\Developer\Console\Controller\ActionList</item> 
+               
+                <!-- Deploy Static Content-->
+               <item name="deploy_static_files" xsi:type="object">Betagento\Developer\Console\DeployStaticFile</item>
+               <item name="deploy_requirejs" xsi:type="object">Betagento\Developer\Console\DeployRequireJs</item>
+
+               <!--Others-->
+               <item name="build_order_grid_items" xsi:type="object">Betagento\Developer\Console\Order\BuildOrderGrid</item>
+              
+            
             </argument>
         </arguments>
     </type>
+
+    
 
 </config>    
