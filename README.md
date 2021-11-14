@@ -52,8 +52,25 @@ Options:
 
 ![image](https://user-images.githubusercontent.com/820411/140700694-3d79bcc3-cbbb-4ecf-8d04-f31f8c653b72.png)
 
+### 3. Show all controller actions for a frontname per a scope
+```
+bin/magento beta_dev:show_controller_action  -f checkout -a frontend
+```
 
+```
+Description:
+  Show all controller actions for a frontname per a scope
 
+Usage:
+  beta_dev:show_controller_action [options]
+
+Options:
+  -f, --frontname=FRONTNAME  Frontname : --m catalog
+  -a, --area=AREA            Area Code: --a frontend|adminhtml 
+```
+Example Result:
+
+![image](https://user-images.githubusercontent.com/820411/141668634-744cf4a5-4322-461d-9705-508ebae0bb8f.png)
 
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
