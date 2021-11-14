@@ -80,7 +80,7 @@ class ActionList extends Command {
         ];
         
         $this->setName('beta_dev:show_controller_action');
-        $this->setDescription('Deploy requirejs-config.js');
+        $this->setDescription('Show all controller actions for a frontname per a scope');
         $this->setDefinition($options);
         parent::configure();
     }
