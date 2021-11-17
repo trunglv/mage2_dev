@@ -79,6 +79,10 @@ Example Result:
 ```
 bin/magento beta_dev:deploy_static -m Magento_Checkout -f js/view/shipping-address/address-renderer/default.js -t Magento/luna
 ```
+-- Able to deploy adminhtml themes and fully deploy for a directory
+```
+bin/magento beta_de:deploy_static -t Magento/backend -a adminhtml -m Magento_Catalog -f js
+```
 
 ### 2. Deploy a requirejs-config.js 
 Example:
