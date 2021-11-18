@@ -190,11 +190,13 @@ class DeployStaticFile extends Command
         $viewDir = $this->moduleDir->getDir($moduleName, Dir::MODULE_VIEW_DIR);
         $viewDir .= $separator . $area . $separator . 'web'. $separator .$file ;
         $files = [];
+        /*
+        if (!file_exists($viewDir)) {
+            $output->writeln("Can't find a file or a directory for this path : ". $viewDir);
+            return;
+        }
+        */
         if(is_dir($viewDir)) {
-            if (!file_exists($viewDir)) {
-                $output->writeln("Can't find a directory in system");
-                return;
-            }
             $actions[$moduleName] = [];
             $dirIterator = new \RecursiveDirectoryIterator($viewDir, \RecursiveDirectoryIterator::SKIP_DOTS);
             $recursiveIterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::LEAVES_ONLY);
