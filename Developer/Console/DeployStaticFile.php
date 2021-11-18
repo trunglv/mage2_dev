@@ -1,7 +1,7 @@
 <?php
 /**
- * @trunglv 
- */
+ * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
+ */ 
 namespace Betagento\Developer\Console;
 
 use Symfony\Component\Console\Command\Command;
