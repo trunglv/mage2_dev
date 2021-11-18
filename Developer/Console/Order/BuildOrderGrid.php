@@ -1,26 +1,40 @@
-<?php 
+<?php
+/**
+ * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
+ */ 
 namespace Betagento\Developer\Console\Order;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Magento\Framework\App\ObjectManager;
 
 class BuildOrderGrid extends Command {
 
-    
     const MISSING_ORDERS = 'missing-orders'; 
-
     const STANDALONE_ORDER = 'standalone-order'; 
 
-
-    public function __construct()
+    /**
+     * it's virtual class -- pls check di for more information
+     * @param \Magento\Sales\Model\ResourceModel\GridInterface
+     */
+    private $orderGrid;
+    /**
+     * @param \Magento\Sales\Model\ResourceModel\GridInterface $orderGrid
+     */
+    public function __construct(
+        \Magento\Sales\Model\ResourceModel\GridInterface $orderGrid
+    )
     {
+        $this->orderGrid = $orderGrid;
         parent::__construct();
     }
 
-    
+    /**
+     * @inheritDoc
+     *
+     * @return void
+     */
     protected function configure() {
         
         $options = [
@@ -44,27 +58,29 @@ class BuildOrderGrid extends Command {
         parent::configure();
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function execute(InputInterface $input, OutputInterface $output) {
         
-        if ($input->getOption(self::MISSING_ORDERS) || $input->getOption(self::STANDALONE_ORDER)) {
-            /**
-             * I have to use ObjectManager here, because I can inject an object "Magento\Sales\Model\ResourceModel\Order\Grid" into a contructor function.
-             */
-            $gridBuilding = ObjectManager::getInstance()->get('Magento\Sales\Model\ResourceModel\Order\Grid');
-            
-            if($input->getOption(self::MISSING_ORDERS)){
-                $output->writeln("--- Building for missing items ---");
-                $gridBuilding->refreshBySchedule(); 
-            }
-            if($orderId = $input->getOption(self::STANDALONE_ORDER)){
-                $output->writeln(sprintf("--- Building for a specific order: %s --- ", $orderId));
-                $gridBuilding->refresh($orderId);
-            }
-
-		} else {
-			$output->writeln("Please read a guideline to use this command. Thank you!");
+        if (!$input->getOption(self::MISSING_ORDERS) && !$input->getOption(self::STANDALONE_ORDER)) {
+            $output->writeln("Please provide theme path");
+            return;
         }
-           
+        /**
+         * Refresh order grid items for missing ones.
+         */
+        if($input->getOption(self::MISSING_ORDERS)){
+            $output->writeln("--- Building for missing items ---");
+            $this->orderGrid->refreshBySchedule(); 
+        }
+        /**
+         * Refresh order grid item for a specific one.
+         */
+        if($orderId = $input->getOption(self::STANDALONE_ORDER)){
+            $output->writeln(sprintf("--- Building for a specific order: %s --- ", $orderId));
+            $this->orderGrid->refresh($orderId);
+        }           
     }
 
 }

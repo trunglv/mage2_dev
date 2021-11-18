@@ -1,6 +1,7 @@
+<!--
+ @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-
-  
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
@@ -16,11 +17,15 @@
                <!--Others-->
                <item name="build_order_grid_items" xsi:type="object">Betagento\Developer\Console\Order\BuildOrderGrid</item>
               
-            
             </argument>
         </arguments>
     </type>
 
+    <type name="Betagento\Developer\Console\Order\BuildOrderGrid">
+         <arguments>
+            <argument name="orderGrid" xsi:type="object">Magento\Sales\Model\ResourceModel\Order\Grid</argument>
+         </arguments>   
+    </type>
     
 
 </config>    
