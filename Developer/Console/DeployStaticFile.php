@@ -164,53 +164,52 @@ class DeployStaticFile extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (($file = $input->getOption(self::FILE_PATH)) && ($themeName = $input->getOption(self::THEME_PATH))) {
-            $this->output = $output;
-            $this->tableOutput = new Table($output);
-            $this->tableOutput->setHeaders(['path', 'absolute_path']);
-
-            $area = $input->getOption(self::AREA_CODE) ? $input->getOption(self::AREA_CODE) : 'frontend';
-            $this->state->setAreaCode($area);
-            $moduleName = $input->getOption(self::MODULE_NAME) ? $input->getOption(self::MODULE_NAME) : '';
-            $specificLanguageCode = $input->getOption(self::LOCALE_CODE);
-            
-            $this->assetParams = [
-                'area' => $area,
-                'theme' => $themeName,
-                //'locale' => $languageCode,
-                'module' =>  $moduleName,
-                'specific_locale' => $specificLanguageCode
-            ];
-
-            $separator = DIRECTORY_SEPARATOR;
-            $viewDir = $this->moduleDir->getDir($moduleName, Dir::MODULE_VIEW_DIR);
-            $viewDir .= $separator . $area . $separator . 'web'. $separator .$file ;
-            $files = [];
-            if(is_dir($viewDir)) {
-                if (!file_exists($viewDir)) {
-                    $output->writeln("Can't find a directory in system");
-                    return;
-                }
-                $actions[$moduleName] = [];
-                $dirIterator = new \RecursiveDirectoryIterator($viewDir, \RecursiveDirectoryIterator::SKIP_DOTS);
-                $recursiveIterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::LEAVES_ONLY);
-                foreach ($recursiveIterator as $actionFile) {
-                    $filePath = str_replace($viewDir, '', $actionFile->getPathname());
-                    $files[] = $file. $filePath;
-                    
-                }
-            }else{
-                $files = [$file];
-            }
-
-            $publishAssetClosure = \Closure::fromCallable([$this, 'executeAsset']);
-            array_walk($files, $publishAssetClosure);
-            $this->tableOutput->render();
-
-        } else {
+        if (!($file = $input->getOption(self::FILE_PATH)) || !($themeName = $input->getOption(self::THEME_PATH))) {
             $output->writeln("Please provide either a file name and theme name");
+            return;
         }
+            
+        $this->output = $output;
+        $this->tableOutput = new Table($output);
+        $this->tableOutput->setHeaders(['path', 'absolute_path']);
+
+        $area = $input->getOption(self::AREA_CODE) ? $input->getOption(self::AREA_CODE) : 'frontend';
+        $this->state->setAreaCode($area);
+        $moduleName = $input->getOption(self::MODULE_NAME) ? $input->getOption(self::MODULE_NAME) : '';
+        $specificLanguageCode = $input->getOption(self::LOCALE_CODE);
         
+        $this->assetParams = [
+            'area' => $area,
+            'theme' => $themeName,
+            //'locale' => $languageCode,
+            'module' =>  $moduleName,
+            'specific_locale' => $specificLanguageCode
+        ];
+
+        $separator = DIRECTORY_SEPARATOR;
+        $viewDir = $this->moduleDir->getDir($moduleName, Dir::MODULE_VIEW_DIR);
+        $viewDir .= $separator . $area . $separator . 'web'. $separator .$file ;
+        $files = [];
+        if(is_dir($viewDir)) {
+            if (!file_exists($viewDir)) {
+                $output->writeln("Can't find a directory in system");
+                return;
+            }
+            $actions[$moduleName] = [];
+            $dirIterator = new \RecursiveDirectoryIterator($viewDir, \RecursiveDirectoryIterator::SKIP_DOTS);
+            $recursiveIterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::LEAVES_ONLY);
+            foreach ($recursiveIterator as $actionFile) {
+                $filePath = str_replace($viewDir, '', $actionFile->getPathname());
+                $files[] = $file. $filePath;
+                
+            }
+        }else{
+            $files = [$file];
+        }
+
+        $publishAssetClosure = \Closure::fromCallable([$this, 'executeAsset']);
+        array_walk($files, $publishAssetClosure);
+        $this->tableOutput->render();
     }
 
     /**
