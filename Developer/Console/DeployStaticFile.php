@@ -197,7 +197,6 @@ class DeployStaticFile extends Command
         }
         */
         if(is_dir($viewDir)) {
-            $actions[$moduleName] = [];
             $dirIterator = new \RecursiveDirectoryIterator($viewDir, \RecursiveDirectoryIterator::SKIP_DOTS);
             $recursiveIterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::LEAVES_ONLY);
             foreach ($recursiveIterator as $actionFile) {
