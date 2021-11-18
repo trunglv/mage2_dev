@@ -10,17 +10,36 @@ use Magento\Framework\App\State;
 use Magento\Framework\Config\ScopeInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
-
 class ShowObservers extends Command{
 
     const EVENT_CODE = 'event';
     const SCOPE_CODE = 'scope_code';
 
-    protected $plugins;
+    /**
+     * @var \Magento\Framework\Event\ConfigInterface $eventConfig $scopeConfig
+     */
+    protected $eventConfig;
+    
+    /**
+     * @var ScopeInterface $scopeConfig
+     */
+    protected $scopeConfig;
 
+    /**
+     * @var State $state
+     */
+    protected $state;
+
+    
+    /**
+     * Constructor
+     *
+     * @param \Magento\Framework\Event\ConfigInterface $eventConfig
+     * @param State $state
+     * @param ScopeInterface $scopeConfig
+     */
     public function __construct(
         \Magento\Framework\Event\ConfigInterface $eventConfig,
-        //Emulation $emulation,
         State $state,
         ScopeInterface $scopeConfig
     )
@@ -72,41 +91,38 @@ class ShowObservers extends Command{
             $me = $this;
             array_walk($scopes, function($scope) use ($inputScope, $me, $output, $eventCode) {
                 if($inputScope && $inputScope != $scope ){
-                    // nothing to do
+                    return;
+                }
+                $this->scopeConfig->setCurrentScope($scope);
+                $configs = $me->eventConfig->getObservers($eventCode);
+                $outputStyle = new OutputFormatterStyle(null, null, ['bold', 'underscore']);
+                $output->getFormatter()->setStyle('fire', $outputStyle);
+                $output->writeln("<fire>Observers for scope {$scope} </>");
+                if(count($configs)){
+                    $tableConfigs = array_map(function($data, $key){
+                        $instanceClass = new \ReflectionClass($data['instance']);
+                        if (!$instanceClass->implementsInterface('Magento\Framework\Event\ObserverInterface'))
+                        {
+                            $data['check'] = sprintf('must implement interface "ObserverInterface" ');
+                        }else{
+                            $data['check'] = 'ok';
+                        }
+                        return $data;
+                    }, $configs, array_keys($configs));
+
+                    $table = new Table($output);
+                    $table
+                        ->setHeaders(array_keys( $tableConfigs[0]) )
+                        ->setRows($tableConfigs);
+                    ;
+                    $table->render();
                 }else{
-                    $this->scopeConfig->setCurrentScope($scope);
-                    $configs = $me->eventConfig->getObservers($eventCode);
-                    $outputStyle = new OutputFormatterStyle(null, null, ['bold', 'underscore']);
-                    $output->getFormatter()->setStyle('fire', $outputStyle);
-                    $output->writeln("<fire>Observers for scope {$scope} </>");
-                    if(count($configs)){
-                        $tableConfigs = array_map(function($data, $key){
-                            $instanceClass = new \ReflectionClass($data['instance']);
-                            if (!$instanceClass->implementsInterface('Magento\Framework\Event\ObserverInterface'))
-                            {
-                               $data['check'] = sprintf('must implement interface "ObserverInterface" ');
-                            }else{
-                                $data['check'] = 'ok';
-                            }
-
-                            return $data;
-                        }, $configs, array_keys($configs));
-
-                        $table = new Table($output);
-                        $table
-                            ->setHeaders(array_keys( $tableConfigs[0]) )
-                            ->setRows($tableConfigs);
-                        ;
-                        $table->render();
-                    }else{
-                        $output->writeln("--There is no observer for this event --");
-                    }
+                    $output->writeln("--There is no observer for this event --");
                 }
             });
         }else{
             $output->writeln("--Please provide an event name --");
         }
-        
     }
 
 }
