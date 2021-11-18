@@ -166,9 +166,11 @@ class ActionList extends Command {
         $path = str_replace($modudePath, '' ,$actionPath);
         $actionPaths = explode('\\',$path);
         $actionName = array_pop($actionPaths);
+        if(in_array($actionName, $this->reservedWords)){
+            return 'Action name is invalid -- due to same to programming syntax';
+        }
         $contollerPath = implode("_",$actionPaths);
         $path = $frontName. '\\' . $contollerPath . '\\' . $actionName;
-
         if($area == 'adminhtml')
             $path = '[ADMIN_PATH_CONFIG]\\'. $path;
 

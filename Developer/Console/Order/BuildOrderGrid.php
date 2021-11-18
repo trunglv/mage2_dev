@@ -64,7 +64,7 @@ class BuildOrderGrid extends Command {
     protected function execute(InputInterface $input, OutputInterface $output) {
         
         if (!$input->getOption(self::MISSING_ORDERS) && !$input->getOption(self::STANDALONE_ORDER)) {
-            $output->writeln("Please provide theme path");
+            $output->writeln("Please provide correct command line agurments.");
             return;
         }
         /**

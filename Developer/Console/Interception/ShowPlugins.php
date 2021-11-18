@@ -6,23 +6,23 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Table;
-
-
-
-use Betagento\Developer\Console\Interception\PluginList;
+use Betagento\Developer\Di\Interception\PluginList;
 
 class ShowPlugins extends Command{
 
     const OBJECT_TYPE = 'type';
     const SCOPE_CODE = 'scope_code';
 
-    protected $plugins;
+    /**
+     * @var PluginList
+     */
+    protected $pluginCollector;
 
     public function __construct(
-        PluginList $plugins
+        PluginList $pluginCollector
     )
     {
-        $this->plugins = $plugins;
+        $this->pluginCollector = $pluginCollector;
         parent::__construct();
     }
 
@@ -52,7 +52,7 @@ class ShowPlugins extends Command{
     public function execute(InputInterface $input, OutputInterface $output){
 
         if ($objectType = $input->getOption(self::OBJECT_TYPE)) {
-            $plugins = $this->plugins->getPlugins($objectType, $input->getOption(self::SCOPE_CODE));
+            $plugins = $this->pluginCollector->getPlugins($objectType, $input->getOption(self::SCOPE_CODE));
             if(count($plugins)){
                 $table = new Table($output);
                 $table
@@ -67,6 +67,7 @@ class ShowPlugins extends Command{
             }
             
         }
+        $output->writeln("-- Please input a class name for a type --");
         
     }
 
