@@ -64,7 +64,7 @@ class Reflection
         $meta = [
             'route' => [
                 'service_class' => $serviceClassName,
-                'preference_class' => $this->objectManagerConfig->getInstanceType($serviceClassName),
+                'preference_class' => $this->objectManagerConfig->getPreference($serviceClassName),
                 'service_method' => $serviceMethodName
             ]
         ];
