@@ -17,6 +17,9 @@
                <!--Others-->
                <item name="build_order_grid_items" xsi:type="object">Betagento\Developer\Console\Order\BuildOrderGrid</item>
               
+               <!-- API Relection-->
+               <item name="api_refelection" xsi:type="object">Betagento\Developer\Console\Webapi\Reflection</item>
+               
             </argument>
         </arguments>
     </type>
