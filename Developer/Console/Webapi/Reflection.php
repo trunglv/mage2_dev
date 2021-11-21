@@ -39,7 +39,7 @@ class Reflection extends Command
 				self::HTTP_METHOD,
 				'-m : -m POST',
 				InputOption::VALUE_OPTIONAL,
-				'Locale code: -m POST '
+				'HTTP Method: -m POST '
 			)
         ];
         $this->setName('beta_dev:api_reflection');
