@@ -72,6 +72,32 @@ Example Result:
 
 ![image](https://user-images.githubusercontent.com/820411/141668634-744cf4a5-4322-461d-9705-508ebae0bb8f.png)
 
+### 4. Reflect Api Service
+
+```
+Description:
+  Refection for API Services
+
+Usage:
+  beta_dev:api_reflection [options]
+
+Options:
+  -a, --api=API                    API ID : -a : /V1/carts/:cartId/shipping-information 
+  -m, --http_method[=HTTP_METHOD]  HTTP Method: -m POST 
+
+```
+Example :
+```
+bin/magento beta_dev:api_reflection --api "/V1/carts/:cartId/shipping-information" -m POST
+```
+##### General information
+![image](https://user-images.githubusercontent.com/820411/142757603-e20ba6e8-f950-4a13-8bb4-c4646787b271.png)
+##### Input Data Reflection
+![image](https://user-images.githubusercontent.com/820411/142757393-25dd2ae0-d06a-4319-8e7c-937aaaf6b3d1.png)
+##### Output Data Reflection
+![image](https://user-images.githubusercontent.com/820411/142757398-e75dda1a-c441-4be0-b1d0-458a315e80f2.png)
+
+
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
 ### Before run CLI commands below - Pls ensure you have deleted the folder var/view_proccessed ( Some static files are cached in that folder)
