@@ -91,12 +91,11 @@ Example :
 bin/magento beta_dev:api_reflection --api "/V1/carts/:cartId/shipping-information" -m POST
 ```
 ##### General information
-![image](https://user-images.githubusercontent.com/820411/142757572-094720a8-a1ec-438a-b739-8c556097bc80.png)
+![image](https://user-images.githubusercontent.com/820411/142757603-e20ba6e8-f950-4a13-8bb4-c4646787b271.png)
 ##### Input Data Reflection
 ![image](https://user-images.githubusercontent.com/820411/142757393-25dd2ae0-d06a-4319-8e7c-937aaaf6b3d1.png)
 ##### Output Data Reflection
 ![image](https://user-images.githubusercontent.com/820411/142757398-e75dda1a-c441-4be0-b1d0-458a315e80f2.png)
-
 
 
 
