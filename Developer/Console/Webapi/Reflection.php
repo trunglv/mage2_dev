@@ -37,7 +37,7 @@ class Reflection extends Command
             ),
             new InputOption(
 				self::HTTP_METHOD,
-				'-m : -m POST',
+				'-m',
 				InputOption::VALUE_OPTIONAL,
 				'HTTP Method: -m POST '
 			)
