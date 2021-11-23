@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Magento\Framework\App\ObjectManager;
 
 class BuildOrderGrid extends Command {
 
@@ -23,10 +24,11 @@ class BuildOrderGrid extends Command {
      * @param \Magento\Sales\Model\ResourceModel\GridInterface $orderGrid
      */
     public function __construct(
-        \Magento\Sales\Model\ResourceModel\GridInterface $orderGrid
+        $orderGrid = false
     )
     {
-        $this->orderGrid = $orderGrid;
+        
+        $this->orderGrid = isset($orderGrid['instance']) ? ObjectManager::getInstance()->get($orderGrid['instance']) : false;
         parent::__construct();
     }
 
@@ -62,7 +64,11 @@ class BuildOrderGrid extends Command {
      * @inheritDoc
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
-        
+        if(!$this->orderGrid){
+            $output->writeln("--- We faced with Virtual Class issue ---");
+            return;
+        }
+
         if (!$input->getOption(self::MISSING_ORDERS) && !$input->getOption(self::STANDALONE_ORDER)) {
             $output->writeln("Please provide correct command line agurments.");
             return;
