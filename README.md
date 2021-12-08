@@ -1,8 +1,8 @@
 # mage2_dev - CLI tools for Magento 2 Development and Deployment
 
-## Installation:
+## Installation: ( Pls use Composer > 2.0 ) 
 ```
-composer require trunglv/mage2-dev
+composer require trunglv/mage2-dev:dev-main
 ```
 
 ## If you have any idea about a new stuff need to be added, pls contact me via email : luuvantrung@gmail.com or skype beta_trunglv! My pleasure!
