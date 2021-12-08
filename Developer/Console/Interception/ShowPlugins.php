@@ -29,6 +29,9 @@ class ShowPlugins extends Command{
         parent::__construct();
     }
 
+    /**
+     * @return void
+     */
     protected function configure() {
         
         $options = [
@@ -52,10 +55,18 @@ class ShowPlugins extends Command{
         parent::configure();
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
     public function execute(InputInterface $input, OutputInterface $output){
-
+       
         if ($objectType = $input->getOption(self::OBJECT_TYPE)) {
-            $plugins = $this->pluginCollector->getPlugins($objectType, $input->getOption(self::SCOPE_CODE));
+            
+            $plugins = $this->pluginCollector->getPlugins(strval($objectType), strval($input->getOption(self::SCOPE_CODE)));
             if(count($plugins)){
                 $table = new Table($output);
                 $table
@@ -71,7 +82,7 @@ class ShowPlugins extends Command{
             
         }
         $output->writeln("-- Please input a class name for a type --");
-        
+        return 1;
     }
 
 }
