@@ -8,10 +8,10 @@
     "version": "0.0.1",
     "autoload": {
         "files": [
-            "registration.php"
+            "Developer/registration.php"
         ],
         "psr-4": {
-            "Betagento\\Developer\\": ""
+            "Betagento\\Developer\\": "Developer"
         }
     },
     "license": [
