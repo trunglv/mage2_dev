@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
- */ 
+ */
 
 namespace Betagento\Developer\Console\Controller;
 
@@ -15,30 +16,44 @@ use Magento\Framework\App\Route\ConfigInterface;
 use Magento\Framework\Module\Dir;
 use Symfony\Component\Console\Helper\Table;
 
-class ActionList extends Command {
+class ActionList extends Command
+{
 
-    const FRONT_NAME = 'frontname'; 
-    const AREA_CODE = 'area'; 
+    const FRONT_NAME = 'frontname';
+    const AREA_CODE = 'area';
 
-    /*
+    /**
      * @var ModuleReader
      */
     protected $moduleReader;
 
-    /*
+    /**
      * @var ConfigInterface
      */
     protected $routeConfig;
-    
-    /*
+
+    /**
      * @var Dir
      */
     protected $moduleDir;
-    
+
     /**
-     * Constructor
-     *
-     * @param ModuleReader $state
+     * @var array<int,string>
+     */
+    protected $reservedWords = [
+        'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class', 'clone', 'const',
+        'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare',
+        'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final',
+        'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'instanceof',
+        'insteadof', 'interface', 'isset', 'list', 'namespace', 'new', 'or', 'print', 'private', 'protected',
+        'public', 'require', 'return', 'static', 'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var',
+        'while', 'xor', 'void',
+    ];
+
+    /**
+     * @param ModuleReader $moduleReader
+     * @param ConfigInterface $routeConfig
+     * @param Dir $moduleDir
      */
     public function __construct(
         ModuleReader $moduleReader,
@@ -51,63 +66,56 @@ class ActionList extends Command {
         parent::__construct();
     }
 
-    
     /**
-     * @var array
+     * @return void
      */
-    protected $reservedWords = [
-        'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class', 'clone', 'const',
-        'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare',
-        'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final',
-        'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'instanceof',
-        'insteadof','interface', 'isset', 'list', 'namespace', 'new', 'or', 'print', 'private', 'protected',
-        'public', 'require', 'return', 'static', 'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var',
-        'while', 'xor', 'void',
-    ];
-
-
-    protected function configure() {
-        
+    protected function configure()
+    {
         $options = [
             new InputOption(
-				self::FRONT_NAME,
-				'-f',
-				InputOption::VALUE_REQUIRED,
-				'Frontname : --m catalog'
+                self::FRONT_NAME,
+                '-f',
+                InputOption::VALUE_REQUIRED,
+                'Frontname : --m catalog'
             ),
             new InputOption(
-				self::AREA_CODE,
-				'-a',
-				InputOption::VALUE_REQUIRED,
-				'Area Code: --a frontend|adminhtml '
-			)
+                self::AREA_CODE,
+                '-a',
+                InputOption::VALUE_REQUIRED,
+                'Area Code: --a frontend|adminhtml '
+            )
         ];
-        
         $this->setName('beta_dev:show_controller_action');
         $this->setDescription('Show all controller actions for a frontname per a scope');
         $this->setDefinition($options);
         parent::configure();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
-        
-        if ( !( $frontName = $input->getOption(self::FRONT_NAME) ) || !($area = $input->getOption(self::AREA_CODE) ) ) {
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+
+        if (!($frontName = $input->getOption(self::FRONT_NAME)) || !($area = $input->getOption(self::AREA_CODE))) {
 
             $output->writeln("Front name or Area Code");
-            return;
+            return 0;
         }
-            
+
         $actions = [];
-        try{
-            $modules = $this->routeConfig->getModulesByFrontName($frontName , $area);
-        }catch(\Throwable $ex){
+        try {
+            $modules = $this->routeConfig->getModulesByFrontName($frontName, $area);
+        } catch (\Throwable $ex) {
             $output->writeln("Front name or Area Code is invalid!");
-            return;
+            return 0;
         }
-        
-        foreach($modules as $moduleName){
-            $actionDir = $this->moduleDir->getDir($moduleName , Dir::MODULE_CONTROLLER_DIR) ;
-        
+
+        foreach ($modules as $moduleName) {
+            $actionDir = $this->moduleDir->getDir($moduleName, Dir::MODULE_CONTROLLER_DIR);
+
             if (!file_exists($actionDir)) {
                 $output->writeln("Dir is not exist");
             }
@@ -118,67 +126,74 @@ class ActionList extends Command {
             /** @var \SplFileInfo $actionFile */
 
             foreach ($recursiveIterator as $actionFile) {
+                if ($area == 'frontend')
+                    if (in_array('Adminhtml', explode("/", str_replace($actionDir, '', $actionFile->getPathname())))) continue;
 
-                if($area == 'frontend')
-                    if(in_array( 'Adminhtml', explode("/", str_replace($actionDir, '', $actionFile->getPathname()) ) )) continue;
-        
-                if($area == 'adminhtml')
-                    if(!in_array( 'Adminhtml', explode("/", str_replace($actionDir, '', $actionFile->getPathname()) ) )) continue;
-                
+                if ($area == 'adminhtml')
+                    if (!in_array('Adminhtml', explode("/", str_replace($actionDir, '', $actionFile->getPathname())))) continue;
+
                 $actionName = str_replace('/', '\\', str_replace($actionDir, '', $actionFile->getPathname()));
                 $action = $namespace . "\\" . Dir::MODULE_CONTROLLER_DIR . substr($actionName, 0, -4);
 
-                if(is_subclass_of($action, \Magento\Framework\App\ActionInterface::class)){
-
+                if (is_subclass_of($action, \Magento\Framework\App\ActionInterface::class , true)) {
                     $controllerClass =  new \ReflectionClass($action);
-                    if(!$controllerClass->isAbstract() && !$controllerClass->isInterface())
-                        $actions[$moduleName][strtolower($action)] = 
-                            [
-                                'action_class' => $action,
-                                'path' => $this->getPossibleUrlPath($moduleName, $frontName, $area, strtolower($action))
-                            ]
-                        ;
+                    if (!$controllerClass->isAbstract() && !$controllerClass->isInterface()){
+                        $actions[$moduleName][strtolower($action)] =
+                        [
+                            'action_class' => $action,
+                            'path' => $this->getPossibleUrlPath($moduleName, $frontName, $area, strtolower($action))
+                        ];
+                    }
                 }
             }
 
-            if(count($actions)){
+            if (isset($actions[$moduleName]) > 0) {
+
                 $outputStyle = new OutputFormatterStyle(null, null, ['bold', 'underscore']);
                 $output->getFormatter()->setStyle('fire', $outputStyle);
                 $output->writeln("<fire>Controller Actions are defined in a module {$moduleName} </>");
-
+                /**
+                 * @var array<string,mixed> $actions[$moduleName]
+                 */
                 $table = new Table($output);
                 $table
-                    ->setHeaders(array_keys(current($actions[$moduleName])) )
-                    ->setRows(array_map(function($action){
-                        return $action;
-                    }, $actions[$moduleName] ))
-                ;
+                    ->setHeaders(array_keys(current($actions[$moduleName])))
+                    ->setRows($actions[$moduleName]);
+
                 $table->render();
-                if($area == 'adminhtml')
+                if ($area == 'adminhtml')
                     $output->writeln("[ADMIN_PATH_CONFIG] is 'admin' by default, but can be adjusted by Magento Configuration!");
             }
         }
-           
+        return 1;
     }
 
-    protected function getPossibleUrlPath($module, $frontName, $area, $actionPath){
+    /**
+     * Get possible URL for a router
+     *
+     * @param string $module
+     * @param string $frontName
+     * @param string $area
+     * @param string $actionPath
+     * @return string
+     */
+    protected function getPossibleUrlPath($module, $frontName, $area, $actionPath)
+    {
+        if ($area == 'frontend') $area = '';
+        $modudePath  = str_replace('_', '\\', strtolower($module));
 
-        if($area == 'frontend') $area = '';
-            $modudePath  = str_replace('_','\\', strtolower($module));
-        
-        $modudePath = $modudePath.'\\controller\\'. ($area ? $area.'\\' : '') ;
-        $path = str_replace($modudePath, '' ,$actionPath);
-        $actionPaths = explode('\\',$path);
+        $modudePath = $modudePath . '\\controller\\' . ($area ? $area . '\\' : '');
+        $path = str_replace($modudePath, '', $actionPath);
+        $actionPaths = explode('\\', $path);
         $actionName = array_pop($actionPaths);
-        if(in_array($actionName, $this->reservedWords)){
+        if (in_array($actionName, $this->reservedWords)) {
             return 'Action name is invalid -- due to same to programming syntax';
         }
-        $contollerPath = implode("_",$actionPaths);
-        $path = $frontName. '\\' . $contollerPath . '\\' . $actionName;
-        if($area == 'adminhtml')
-            $path = '[ADMIN_PATH_CONFIG]\\'. $path;
+        $contollerPath = implode("_", $actionPaths);
+        $path = $frontName . '\\' . $contollerPath . '\\' . $actionName;
+        if ($area == 'adminhtml')
+            $path = '[ADMIN_PATH_CONFIG]\\' . $path;
 
         return $path;
     }
-
 }
