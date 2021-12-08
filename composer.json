@@ -11,7 +11,7 @@
             "Developer/registration.php"
         ],
         "psr-4": {
-            "Betagento\\Developer\\": "Developer"
+            "Betagento\\": ""
         }
     },
     "autoload-dev": {
@@ -19,7 +19,7 @@
             "Developer/registration.php"
         ],
         "psr-4": {
-            "Betagento\\Developer\\": "Developer"
+            "Betagento\\": ""
         }
     },
     "license": [
