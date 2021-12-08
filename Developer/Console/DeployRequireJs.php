@@ -17,6 +17,31 @@ class DeployRequireJs extends Command {
     const LOCALE_CODE = 'locale_code'; 
 
     /**
+     * @var \Magento\Framework\App\State
+     */
+    protected $state;
+
+    /**
+     * @var \Magento\Framework\ObjectManagerInterface
+     */
+    protected $objectManager;
+    
+    /**
+     * @var ConfigLoaderInterface
+     */
+    protected $configLoader;
+
+    /**
+     * @var \Magento\Store\Model\Config\StoreView
+     */
+    protected $storeView;  
+    
+    /**
+     * @var DeployRequireJsConfig
+     */
+    protected $deployRequireJsConfig;  
+
+    /**
      * Constructor
      *
      * @param \Magento\Framework\App\State $state
@@ -41,7 +66,10 @@ class DeployRequireJs extends Command {
     }
 
     
-
+    /**
+     * @inheritDoc
+     * @return void
+     */
     protected function configure() {
         
         $options = [
@@ -65,11 +93,18 @@ class DeployRequireJs extends Command {
         parent::configure();
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output) {
         $themePath = $input->getOption(self::THEME_PATH);
         if (!$themePath){
             $output->writeln("Please provide theme path");
-            return;
+            return 0;
         }
         $output->writeln($themePath);
         $languageCodes = $this->storeView->retrieveLocales();
@@ -83,6 +118,6 @@ class DeployRequireJs extends Command {
             $this->deployRequireJsConfig->deploy('frontend', $themePath, $languageCode);
             $output->writeln("Deployed requirejs-config.js -- ". $languageCode. "-- theme: ". $themePath);
         }
-           
+        return 1;   
     }
 }
