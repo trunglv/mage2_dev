@@ -1,0 +1,28 @@
+{
+    "name": "trunglv/mage2-dev",
+    "description": "CLI tools for Magento 2 Development and Deployment",
+    "type": "magento2-module",
+    "require": {
+        "php": ">=7.0"
+    },
+    "version": "0.0.1",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Betagento\\Developer\\": ""
+        }
+    },
+    "license": [
+        "OSL-3.0",
+        "AFL-3.0"
+    ],
+    "authors": [
+        {
+            "name": "Luu Van Trung",
+            "email": "luuvantrung@gmail.com",
+            "role": "person"
+        }
+    ]
+}
