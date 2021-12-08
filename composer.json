@@ -3,5 +3,14 @@
     "description": "CLI tools for Magento 2 Development and Deployment",
     "require": {
         "php": ">=7.0"
+    },
+    "version": "0.0.1",
+    "autoload": {
+        "files": [
+            "Developer/registration.php"
+        ],
+        "psr-4": {
+            "Betagento\\Developer\\": ""
+        }
     }
 }
