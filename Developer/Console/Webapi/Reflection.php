@@ -17,7 +17,7 @@ class Reflection extends Command
      */
     private $webApiReflection;
     public function __construct(
-        \Betagento\Developer\WebApi\Reflection $webApiReflection
+        \Betagento\Developer\Webapi\Reflection $webApiReflection
     )
     {
         $this->webApiReflection = $webApiReflection;
