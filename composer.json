@@ -1,0 +1,7 @@
+{
+    "name": "trunglv/mage2-dev",
+    "description": "CLI tools for Magento 2 Development and Deployment",
+    "require": {
+        "php": ">=7.0"
+    }
+}
