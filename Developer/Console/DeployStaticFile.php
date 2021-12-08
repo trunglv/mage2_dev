@@ -28,7 +28,7 @@ class DeployStaticFile extends Command
 
 
     /**
-     * @var \Magento\Framework\App\State $name
+     * @var \Magento\Framework\App\State $state
      */
     protected $state;
 
@@ -38,7 +38,7 @@ class DeployStaticFile extends Command
     protected $publisher;
 
     /**
-     * @var Magento\Framework\View\Asset\Repository 
+     * @var \Magento\Framework\View\Asset\Repository 
      */
     protected $assetRepo;
 
@@ -62,36 +62,32 @@ class DeployStaticFile extends Command
     protected $storeView;
 
     /**
-     * @param Dir
+     * @var \Magento\Framework\Module\Dir
      */
-    private $moduleDir;
+    protected $moduleDir;
 
     /**
-     * @var array
+     * @var array<string,mixed>
      */
     protected $assetParams = [];
 
     /**
-     * @var OutputInterface
-     */
-    private $output;
-
-    /**
      * @var \Symfony\Component\Console\Helper\Table
      */
-    private $tableOutput;
+    protected $tableOutput;
+
+    
     /**
-     * Constructor function
+     * Constructor
      *
-     * @param \Magento\Framework\App\State                $state
-     * @param \Magento\Framework\App\Request\Http         $request
+     * @param \Magento\Framework\App\State $state
      * @param \Magento\Framework\App\View\Asset\Publisher $publisher
-     * @param \Magento\Framework\View\Asset\Repository    $assetRepo
-     * @param \Magento\Framework\Module\ModuleList        $moduleList
-     * @param \Magento\Framework\ObjectManagerInterface   $objectManager
-     * @param ConfigLoaderInterface                       $configLoader
-     * @param \Magento\Framework\Filesystem               $filesystem
-     * @param \Magento\Store\Model\Config\StoreView       $storeView
+     * @param \Magento\Framework\View\Asset\Repository $assetRepo
+     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param ConfigLoaderInterface $configLoader
+     * @param \Magento\Framework\Filesystem $filesystem
+     * @param \Magento\Store\Model\Config\StoreView $storeView
+     * @param \Magento\Framework\Module\Dir $moduleDir
      */
     public function __construct(
         \Magento\Framework\App\State $state,
@@ -101,7 +97,7 @@ class DeployStaticFile extends Command
         ConfigLoaderInterface $configLoader,
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Store\Model\Config\StoreView $storeView,
-        Dir $moduleDir
+        \Magento\Framework\Module\Dir $moduleDir
     ) {
         $this->state = $state;
         $this->publisher = $publisher;
@@ -116,6 +112,7 @@ class DeployStaticFile extends Command
 
     /**
      * @inheritDoc
+     * @return void
      */
     protected function configure()
     {
@@ -161,20 +158,26 @@ class DeployStaticFile extends Command
 
     /**
      * @inheritDoc
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!($file = $input->getOption(self::FILE_PATH)) || !($themeName = $input->getOption(self::THEME_PATH))) {
             $output->writeln("Please provide either a file name and theme name");
-            return;
+            return 0;
         }
             
-        $this->output = $output;
+        //$this->output = $output;
         $this->tableOutput = new Table($output);
         $this->tableOutput->setHeaders(['path', 'absolute_path']);
-
+        /**
+         * @var string $area
+         */
         $area = $input->getOption(self::AREA_CODE) ? $input->getOption(self::AREA_CODE) : 'frontend';
         $this->state->setAreaCode($area);
+        /**
+         * @var string $moduleName
+         */
         $moduleName = $input->getOption(self::MODULE_NAME) ? $input->getOption(self::MODULE_NAME) : '';
         $specificLanguageCode = $input->getOption(self::LOCALE_CODE);
         
@@ -211,16 +214,20 @@ class DeployStaticFile extends Command
         $publishAssetClosure = \Closure::fromCallable([$this, 'executeAsset']);
         array_walk($files, $publishAssetClosure);
         $this->tableOutput->render();
+        return 1;
     }
 
     /**
      * Publish a asset File
-     *
-     * @param  string $file
-     * @return void
+     * @param int $key
+     * @param  mixed $file
+     * @return mixed
      */
-    protected function executeAsset($file)
+    protected function executeAsset($file, $key)
     {
+        /**
+         * @var string $file
+         */
         $languageCodes = $this->storeView->retrieveLocales();
         $specifyLanguageCode = !empty($this->assetParams['specific_locale']) ? $this->assetParams['specific_locale'] : '';
         $rootPath = $this->filesystem->getDirectoryRead(DirectoryList::ROOT)->getAbsolutePath();
@@ -252,5 +259,6 @@ class DeployStaticFile extends Command
             //exit;
         }
         $this->tableOutput->addRow(new TableSeparator());
+        return $file;
     }
 }
