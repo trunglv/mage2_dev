@@ -1,5 +1,5 @@
 <?php
-namespace Betagento\Developer\WebApi;
+namespace Betagento\Developer\Webapi;
 
 use Magento\Framework\Reflection\MethodsMap;
 use Magento\Webapi\Model\Config\Converter as ConfigConverter;
