@@ -1,5 +1,10 @@
 # mage2_dev - CLI tools for Magento 2 Development and Deployment
 
+## Installation: ( Pls use Composer > 2.0 ) 
+```
+composer require trunglv/mage2-dev:dev-main
+```
+
 ## If you have any idea about a new stuff need to be added, pls contact me via email : luuvantrung@gmail.com or skype beta_trunglv! My pleasure!
 
 I think, This project will help developers save time in developement and deployment in any Magento2 project.
@@ -22,6 +27,11 @@ bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [
 
 ##### Clone and copy a source code into a folder app/code/Betagento 
 ##### Just enable this module and run DI Complile ( Magento developers will understand )
+
+## Install from Composer
+```
+composer require trunglv/mage2-dev:dev-main
+```
 
 ## Debug tools
 ### 1. List all plugins for a class
