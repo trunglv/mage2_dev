@@ -117,7 +117,7 @@ bin/magento beta_dev:deploy_static -m Magento_Checkout -f js/view/shipping-addre
 ```
 -- Able to deploy adminhtml themes and fully deploy for a directory
 ```
-bin/magento beta_de:deploy_static -t Magento/backend -a adminhtml -m Magento_Catalog -f js
+bin/magento beta_dev:deploy_static -t Magento/backend -a adminhtml -m Magento_Catalog -f js
 ```
 
 ### 2. Deploy a requirejs-config.js 
@@ -133,10 +133,10 @@ bin/magento  beta_dev:deploy_requirejs -t Magento/luna
 ```
 ### 4. Deploy css/styles-m.css, css/styles-l.css
 ```
-bin/magento  beta_dev:deploy_requirejs -t Magento/luna -f css/styles-l.css
+bin/magento   beta_dev:deploy_static-t Magento/luna -f css/styles-l.css
 ```
 ```
-bin/magento  beta_dev:deploy_requirejs -t Magento/luna -f css/styles-m.css
+bin/magento   beta_dev:deploy_static -t Magento/luna -f css/styles-m.css
 ```
 
 ## Other tools
