@@ -129,7 +129,7 @@ bin/magento  beta_dev:deploy_requirejs -t Magento/luna
 ### 3. Deploy a js-translation.json 
 Example:
 ```
-bin/magento  beta_dev:deploy_requirejs -t Magento/luna
+bin/magento   beta_dev:deploy_static-t Magento/luna -f js-translation.json
 ```
 ### 4. Deploy css/styles-m.css, css/styles-l.css
 ```
