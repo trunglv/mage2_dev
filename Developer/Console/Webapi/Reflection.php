@@ -58,14 +58,15 @@ class Reflection extends Command
         if(!($serviceId = $input->getOption(self::API_ID)))
         {
             $output->writeln(sprintf("Please provide a service id/url, example: %s", "/V1/carts/:cartId/shipping-information"));
-            return;
+            return 1;
         }
         if(!($httpMethod = $input->getOption(self::HTTP_METHOD)))
         {
-            $output->writeln(sprintf("Please provide a HTTP METHOD, example: %s", "POST|GET|PUT"));
-            return;
+            $output->writeln(sprintf("Please provide a HTTP METHOD, example: %s", "-m POST|GET|PUT"));
+            return 1;
         }
         $meta = $this->webApiReflection->show($serviceId, $httpMethod);
+       
         if($meta){
             $serviceClassName = $meta['route']['service_class'];
             $serviceMethodName = $meta['route']['service_method'];
@@ -93,6 +94,6 @@ class Reflection extends Command
             $outputTable = new Table($output);
             $outputTable->addRow([$meta['output']['type']])->render();
         }
-        return;
+        return 0;
     }    
 }
