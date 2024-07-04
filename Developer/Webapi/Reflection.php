@@ -29,6 +29,13 @@ class Reflection
      */
     protected $fieldNamer;
 
+    /**
+     * Cache all Reflected Interfaces
+     *
+     * @var array
+     */
+    protected $_alreadyReflectedInterfaces = [];
+
     public function __construct(
         \Magento\Webapi\Model\ConfigInterface $webapiConfig,
         MethodsMap $methodsMap,
@@ -77,7 +84,7 @@ class Reflection
         $outputType = $this->methodsMap->getMethodReturnType($serviceClassName, $serviceMethodName);
         $meta['output'] = [
             'type' => $this->reflectDataType($outputType),
-        ]; 
+        ];
         return $meta;
     }
     
@@ -110,6 +117,10 @@ class Reflection
      * @return array<mixed>
      */
     protected function getMetaFromInterface($interfaceName){
+        if (in_array($interfaceName, $this->_alreadyReflectedInterfaces)) {
+            return [];
+        }
+        $this->_alreadyReflectedInterfaces[] = $interfaceName;
         $interfaceName = str_replace("[]", "", $interfaceName);
         $interfaceName = $this->objectManagerConfig->getInstanceType($interfaceName);
         $methods =  $this->methodsMap->getMethodsMap($interfaceName);
