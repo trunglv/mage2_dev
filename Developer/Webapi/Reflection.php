@@ -117,9 +117,7 @@ class Reflection
      * @return array<mixed>
      */
     protected function getMetaFromInterface($interfaceName){
-        if (in_array($interfaceName, $this->_alreadyReflectedInterfaces)) {
-            return [];
-        }
+        
         $this->_alreadyReflectedInterfaces[] = $interfaceName;
         $interfaceName = str_replace("[]", "", $interfaceName);
         $interfaceName = $this->objectManagerConfig->getInstanceType($interfaceName);
@@ -131,7 +129,11 @@ class Reflection
                 $fields[$fieldName] = "{$fieldName}: {$info['type']}";
                 $objectType = str_replace("[]", "", $info['type']);
                 if(class_exists($objectType) || interface_exists($objectType)){
-                    $fields["Reflection for type ". $objectType] = $this->getMetaFromInterface($objectType);
+                    if (!in_array($objectType, $this->_alreadyReflectedInterfaces)) {
+                        $fields["Reflection for type ". $objectType] = $this->getMetaFromInterface($objectType);
+                    } else {
+                        $fields["type ". $objectType] = ["Already reflected"];
+                    }   
                 }
             }
         }
