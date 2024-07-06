@@ -9,7 +9,6 @@
 ```
 composer require trunglv/mage2-dev:dev-main
 ```
-```
 
 ## If you have any idea about new stuff that needs to be added, get in touch with me via email: luuvantrung@gmail.com or skype beta.trunglv! My pleasure!
 
