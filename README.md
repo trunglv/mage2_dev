@@ -1,36 +1,19 @@
 # mage2_dev - A few CLI tools for Magento 2 Development and Deployment 
 
-## Installation: ( Pls use Composer > 2.0 ) 
-```
-composer require trunglv/mage2-dev:dev-main
-```
-
-## If you have any idea about new stuff that needs to be added, get in touch with me via email: luuvantrung@gmail.com or skype beta.trunglv! My pleasure!
-
-
-
-#### We can enable a production mode on a local machine host, or DEV server (For saving time loading), And then just put only updated files to a pub/static folder.
-#### For example, if you want to test a mixin you are implementing, just use a few commands.
-
-- Push mixin configuration into a requirejs-config.js of your module.
-```
-   bin/magento  beta_dev:deploy_requirejs -t Magento/luna
-```
-- Deploy your mixin file to pub/static folder
-```
-
-bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [your_theme]
-
-```
 ## Installation
 
 ##### Clone and copy a source code into a folder app/code/Betagento 
-##### Just enable this module and run DI Complile ( Magento developers will understand )
+
 
 ## Install from Composer
 ```
 composer require trunglv/mage2-dev:dev-main
 ```
+```
+
+## If you have any idea about new stuff that needs to be added, get in touch with me via email: luuvantrung@gmail.com or skype beta.trunglv! My pleasure!
+
+
 
 ## Debug tools
 ### 1. List all plugins for a class
