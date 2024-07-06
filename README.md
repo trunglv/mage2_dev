@@ -1,17 +1,16 @@
-# mage2_dev - CLI tools for Magento 2 Development and Deployment
+# mage2_dev - A few CLI tools for Magento 2 Development and Deployment 
 
 ## Installation: ( Pls use Composer > 2.0 ) 
 ```
 composer require trunglv/mage2-dev:dev-main
 ```
 
-## If you have any idea about a new stuff need to be added, pls contact me via email : luuvantrung@gmail.com or skype beta_trunglv! My pleasure!
+## If you have any idea about new stuff that needs to be added, get in touch with me via email: luuvantrung@gmail.com or skype beta.trunglv! My pleasure!
 
-I think, This project will help developers save time in developement and deployment in any Magento2 project.
 
 
 #### We can enable a production mode on a local machine host, or DEV server (For saving time loading), And then just put only updated files to a pub/static folder.
-#### For example, you want to test a mixin you are implementing, just use a few commands.
+#### For example, if you want to test a mixin you are implementing, just use a few commands.
 
 - Push mixin configuration into a requirejs-config.js of your module.
 ```
@@ -40,7 +39,7 @@ Example:
 bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSalableForRequestedQty"
 ```
 
-Examples for results:
+Examples of results:
 
 ![image](https://user-images.githubusercontent.com/820411/140596064-b3299395-16fe-40ef-8b2b-fc4d00a9d2d6.png)
 
@@ -62,14 +61,14 @@ Options:
 
 ![image](https://user-images.githubusercontent.com/820411/140700694-3d79bcc3-cbbb-4ecf-8d04-f31f8c653b72.png)
 
-### 3. Show all controller actions for a frontname per a scope
+### 3. Show all controller actions per a scope 
 ```
 bin/magento beta_dev:show_controller_action  -f checkout -a frontend
 ```
 
 ```
 Description:
-  Show all controller actions for a frontname per a scope
+  Show all controller actions per a scope
 
 Usage:
   beta_dev:show_controller_action [options]
@@ -141,7 +140,7 @@ bin/magento   beta_dev:deploy_static -t Magento/luna -f css/styles-m.css
 
 ## Other tools
 
-### 1. Build an order grid table ( For missing orders and missing data in existed items ) 
+### 1. Build an order grid table ( For missing orders and missing data in existing items ) 
 Example:
 #### Build for all missing orders 
 ```
