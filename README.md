@@ -10,9 +10,6 @@
 composer require trunglv/mage2-dev:dev-main
 ```
 
-## If you have any idea about new stuff that needs to be added, get in touch with me via email: luuvantrung@gmail.com or skype beta.trunglv! My pleasure!
-
-
 
 ## Debug tools
 ### 1. List all plugins for a class
@@ -89,7 +86,7 @@ bin/magento beta_dev:api_reflection --api "/V1/carts/:cartId/shipping-informatio
 
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
-### Before run CLI commands below - Pls ensure you have deleted the folder var/view_proccessed ( Some static files are cached in that folder)
+### Before running CLI commands below - Pls ensure you have deleted the folder var/view_proccessed ( Some static files are cached in that folder)
 ### 1. Build/Deploy CSS/Javascript Files
 ```
 bin/magento beta_dev:deploy_static -m Magento_Checkout -f js/view/shipping-address/address-renderer/default.js -t Magento/luna
@@ -118,18 +115,4 @@ bin/magento   beta_dev:deploy_static-t Magento/luna -f css/styles-l.css
 bin/magento   beta_dev:deploy_static -t Magento/luna -f css/styles-m.css
 ```
 
-## Other tools
-
-### 1. Build an order grid table ( For missing orders and missing data in existing items ) 
-Example:
-#### Build for all missing orders 
-```
-bin/magento beta_dev:build_order_grid --missing-orders true
-
-```
-#### Build for a specific order -- In case you want to refresh just one item due to just missing a few fields. 
-
-```
-bin/magento beta_dev:build_order_grid --missing-orders [order_id]
-
-```
+@Trung,lv - skype: beta.trunglv@outlook.com - email : luuvantrung@gmail.com
