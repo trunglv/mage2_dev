@@ -2,10 +2,10 @@
 
 ## Installation
 
-##### Clone and copy a source code into a folder app/code/Betagento 
+#### Clone and copy a source code into a folder app/code/Betagento 
 
 
-## Install from Composer
+#### Install from Composer
 ```
 composer require trunglv/mage2-dev:dev-main
 ```
