@@ -7,7 +7,7 @@
 
 ##### 2. Install from Composer
 ```
-composer require trunglv/mage2-dev:dev-main [Recommendation]
+composer require trunglv/mage2-dev:dev-main [Recommend]
 ```
 
 ## Debug tools
