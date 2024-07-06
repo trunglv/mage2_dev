@@ -2,14 +2,13 @@
 
 ## Installation
 
-#### Clone and copy a source code into a folder app/code/Betagento 
+##### 1. Clone and copy a source code into a folder app/code/Betagento 
 
 
-#### Install from Composer
+##### 2. Install from Composer
 ```
-composer require trunglv/mage2-dev:dev-main
+composer require trunglv/mage2-dev:dev-main [Recommendation]
 ```
-
 
 ## Debug tools
 ### 1. List all plugins for a class
