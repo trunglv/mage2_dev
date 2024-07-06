@@ -6,7 +6,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <!-- Debug tools-->
-               <item name="beta_show_plugins" xsi:type="object">Betagento\Developer\Console\Interception\ShowPlugins</item>
+               <item name="beta_dev_show_plugins" xsi:type="object">Betagento\Developer\Console\Interception\ShowPlugins</item>
                <item name="beta_show_observers" xsi:type="object">Betagento\Developer\Console\Observer\ShowObservers</item>
                <item name="beta_show_action_list" xsi:type="object">Betagento\Developer\Console\Controller\ActionList</item> 
                
@@ -15,8 +15,9 @@
                <item name="deploy_requirejs" xsi:type="object">Betagento\Developer\Console\DeployRequireJs</item>
 
                <!--Others-->
+               <!--
                <item name="build_order_grid_items" xsi:type="object">Betagento\Developer\Console\Order\BuildOrderGrid</item>
-              
+               -->
                <!-- API Relection-->
                <item name="api_refelection" xsi:type="object">Betagento\Developer\Console\Webapi\Reflection</item>
                
@@ -31,4 +32,4 @@
     </type>
     
 
-</config>    
+</config>
