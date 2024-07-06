@@ -40,11 +40,9 @@ bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSa
 ```
 
 Examples of results:
+![image](https://github.com/trunglv/mage2_dev/assets/820411/15ec3707-776e-4ab9-a8be-1ef11e0bb10c)
 
-![image](https://user-images.githubusercontent.com/820411/140596064-b3299395-16fe-40ef-8b2b-fc4d00a9d2d6.png)
-
-
-![image](https://user-images.githubusercontent.com/820411/140596086-56af8e1f-ba59-4a1c-86d5-c5afa4584480.png)
+When you find plugins for an interface 'Magento\Quote\Api\CartManagementInterface', it will show plugins that are injected into the interface itself and a preference concrete class 'Magento\Quote\Model\QuoteManagement'. 
 
 ### 2. List all observers for an event 
 ```
