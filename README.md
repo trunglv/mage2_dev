@@ -116,27 +116,44 @@ bin/magento beta_dev:api_reflection --api "/V1/carts/:cartId/shipping-informatio
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
 ### Before running CLI commands below - Pls ensure you have deleted the folder var/view_proccessed ( Some static files are cached in that folder)
-### 1. Build/Deploy CSS/Javascript Files
+
+<pre>bin/magento   beta_dev:deploy_static -h
+<font color="#C4A000">Description:</font>
+  Deploy a static file.
+  ---&gt; Deploy static files from a/an module/extension.
+  E.g. bin/magento beta_dev:deploy_static -f js/view/shipping-address/address-renderer/default.js -t Magento/luna -m Magento_Checkout
+  ---&gt; Deploy Css files base on a theme base Magento-Luna architecure.
+  E.g. bin/magento beta_dev:deploy_static -f css/styles-l.css -t Magento/luna
+  E.g. bin/magento beta_dev:deploy_static -f css/styles-m.css -t Magento/luna
+  ---&gt; Deploy JS Translation Json File base on a theme base Magento-Luna architecure.
+  E.g. bin/magento   beta_dev:deploy_static -t Magento/blank -f js-translation.json
+
+<font color="#C4A000">Usage:</font>
+  beta_dev:deploy_static [options]
+
+<font color="#C4A000">Options:</font>
+  <font color="#4E9A06">-f, --file_path=FILE_PATH</font>        File Path/ Directory Path: for specific file -f js/view/shipping-address/address-renderer/default.js OR for a specific folder -f js
+  <font color="#4E9A06">-t, --theme_path=THEME_PATH</font>      Theme path: -t Magento/luna
+  <font color="#4E9A06">-a, --area=AREA</font>                  Area Code: -a frontend|adminhtml
+  <font color="#4E9A06">-m, --module_name[=MODULE_NAME]</font>  Module name: -m Magento_Checkout
+  <font color="#4E9A06">-l, --locale_code[=LOCALE_CODE]</font>  Locale code: -l da_DK 
+</pre>
+
+### 1. Build/Deploy CSS/Javascript Files COME FROM an/a extension/module
 ```
 bin/magento beta_dev:deploy_static -m Magento_Checkout -f js/view/shipping-address/address-renderer/default.js -t Magento/luna
 ```
--- Able to deploy adminhtml themes and fully deploy for a directory
+-- Able to deploy Adminhtml themes and fully deploy for a directory
 ```
 bin/magento beta_dev:deploy_static -t Magento/backend -a adminhtml -m Magento_Catalog -f js
 ```
 
-### 2. Deploy a requirejs-config.js 
-Example:
-```
-bin/magento  beta_dev:deploy_requirejs -t Magento/luna
-```
-
-### 3. Deploy a js-translation.json 
+### 2. Deploy a js-translation.json 
 Example:
 ```
 bin/magento   beta_dev:deploy_static-t Magento/luna -f js-translation.json
 ```
-### 4. Deploy css/styles-m.css, css/styles-l.css
+### 3. Deploy css/styles-m.css, css/styles-l.css
 ```
 bin/magento   beta_dev:deploy_static-t Magento/luna -f css/styles-l.css
 ```
@@ -144,4 +161,17 @@ bin/magento   beta_dev:deploy_static-t Magento/luna -f css/styles-l.css
 bin/magento   beta_dev:deploy_static -t Magento/luna -f css/styles-m.css
 ```
 
+
+
+## RequireJS Config
+### Deploy a requirejs-config.js 
+Example:
+```
+bin/magento  beta_dev:deploy_requirejs -t Magento/luna
+```
+
+### I love coding 
+```
 @Trung,lv - skype: beta.trunglv@outlook.com - email : luuvantrung@gmail.com
+```
+
