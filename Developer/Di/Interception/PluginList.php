@@ -8,7 +8,6 @@ use Magento\Framework\Config\CacheInterface;
 use Magento\Framework\Config\Data\Scoped;
 use Magento\Framework\Config\ReaderInterface;
 use Magento\Framework\Config\ScopeInterface;
-use Magento\Framework\Interception\ConfigLoaderInterface;
 use Magento\Framework\Interception\DefinitionInterface;
 use Magento\Framework\Interception\PluginListGenerator;
 use Magento\Framework\Interception\ObjectManager\ConfigInterface;
@@ -17,11 +16,12 @@ use Magento\Framework\ObjectManager\DefinitionInterface as ClassDefinitions;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Serialize\Serializer\Serialize;
-
+use Magento\Framework\App\Area;
 
 
 class PluginList extends Scoped  {
 
+   
      /**
      * Inherited plugin data
      *
@@ -79,10 +79,6 @@ class PluginList extends Scoped  {
      */
     private $serializer;
 
-    /**
-     * @var ConfigLoaderInterface
-     */
-    private $configLoader;
 
     /**
      * @var PluginListGenerator
@@ -95,7 +91,6 @@ class PluginList extends Scoped  {
      * @param ReaderInterface $reader
      * @param ScopeInterface $configScope
      * @param CacheInterface $cache
-     * @param RelationsInterface $relations
      * @param ConfigInterface $omConfig
      * @param DefinitionInterface $definitions
      * @param ObjectManagerInterface $objectManager
@@ -103,7 +98,6 @@ class PluginList extends Scoped  {
      * @param array $scopePriorityScheme
      * @param string|null $cacheId
      * @param SerializerInterface|null $serializer
-     * @param ConfigLoaderInterface|null $configLoader
      * @param PluginListGenerator|null $pluginListGenerator
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
@@ -119,7 +113,6 @@ class PluginList extends Scoped  {
         array $scopePriorityScheme = ['global'],
         $cacheId = 'plugins',
         SerializerInterface $serializer = null,
-        ConfigLoaderInterface $configLoader = null,
         PluginListGenerator $pluginListGenerator = null
     ) {
         $this->serializer = $serializer ?: $objectManager->get(Serialize::class);
@@ -130,7 +123,6 @@ class PluginList extends Scoped  {
         $this->_classDefinitions = $classDefinitions;
         $this->_scopePriorityScheme = $scopePriorityScheme;
         $this->_objectManager = $objectManager;
-        $this->configLoader = $configLoader ?: $this->_objectManager->get(ConfigLoaderInterface::class);
         $this->pluginListGenerator = $pluginListGenerator ?: $this->_objectManager->get(PluginListGenerator::class);
     }
 
@@ -144,27 +136,43 @@ class PluginList extends Scoped  {
      */
     public function getPlugins($type, $scope) : array{
         $this->_loadScopedData($scope);
-        if (!isset($this->_pluginInstances[$type])) {
-            if (!isset($this->_inherited[$type]) && !array_key_exists($type, $this->_inherited)) {
-                $this->_inheritPlugins($type);
+        $fullWillCheckClasses = [$type];
+        if (interface_exists($type)) {
+            $concreteType = $this->_omConfig->getPreference($type);
+            $concreteType = str_replace("\Interceptor", "", $concreteType);
+            $fullWillCheckClasses[] = $concreteType;
+        }
+        if (class_exists($type) && !interface_exists($type)) {
+            $parentClasses = $this->_relations->getParents($type);
+            if ($parentClasses) {
+                $fullWillCheckClasses = array_merge($fullWillCheckClasses, $parentClasses);
             }
         }
         $plugins = [];
-        $me = $this;
-        if(isset($this->_inherited[$type])){
-            array_walk($this->_inherited[$type], function($item, $key) use ($me, &$plugins, $type) {            
-                $methods = $me->getPluginMethods($item['instance']);
-                foreach($methods as $methodName => $methodType){
-                    $plugins[] = [
-                        'code' => $key,
-                        'original_method' => $methodName,
-                        'plugin_method_type' => $me->getPluginMethodType($methodType),
-                        'instance' => $item['instance'],
-                        'method_exists' => $me->isInjectedMethodExists($type, $methodName)
-                    ];
-                }
-            },[]);
+        foreach ($fullWillCheckClasses as $specificType) {
+            $pluginDefinition = [];
+            if (!isset($this->_inherited[$specificType]) && !array_key_exists($type, $this->_inherited)) {
+                $pluginDefinition = $this->_data[$specificType];
+            }
+            $me = $this;
+            if($pluginDefinition){
+                $plugins[$specificType] = [];
+                array_walk($pluginDefinition, function($item, $key) use ($me, &$plugins, $specificType) {            
+                    $methods = $me->getPluginMethods($item['instance']);
+                    foreach($methods as $methodName => $methodType){
+                        $plugins[$specificType][] = [
+                            'code' => $key,
+                            'original_method' => $methodName,
+                            'plugin_method_type' => $me->getPluginMethodType($methodType),
+                            'instance' => $item['instance'],
+                            'method_exists' => $me->isInjectedMethodExists($specificType, $methodName) ? 'method is ok' : 'method does not exist'
+                        ];
+                    }
+                },[]);
+            }
         }
+        
+        
         return $plugins;
     }
 
@@ -176,6 +184,7 @@ class PluginList extends Scoped  {
      */
     protected function getPluginMethods($pluginInstanceName){
         $pluginType = $this->_omConfig->getOriginalInstanceType($pluginInstanceName);
+        
         if (!class_exists($pluginType)) {
             throw new \InvalidArgumentException('Plugin class ' . $pluginInstanceName . ' doesn\'t exist');
         }
@@ -191,20 +200,21 @@ class PluginList extends Scoped  {
      */
     protected function isInjectedMethodExists($instanceType, $pluginMethod){
        
-        $methods = get_class_methods($pluginMethod);
+        //var_dump($pluginMethod);exit;
+        //$methods = get_class_methods($pluginMethod);
         $class = new \ReflectionClass($instanceType);
         $methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
         
         return count(array_filter($methods, function($method) use ($pluginMethod) {
             return $method->getName() == $pluginMethod;
-        })) > 0  ? 'method is ok' : 'method does not exist' ;
+        })) > 0  ? true : false ;
     }
 
     /**
      * Get Injected Method Type
      *
      * @param string $methodType
-     * @return void
+     * @return string
      */
     protected function getPluginMethodType($methodType){
         switch($methodType){
@@ -218,7 +228,6 @@ class PluginList extends Scoped  {
         return '';
     }
 
-    
     /**
      * Load configuration for current scope
      *
@@ -227,73 +236,31 @@ class PluginList extends Scoped  {
      */
     protected function _loadScopedData($givenScope = null)
     {
+
+        [$this->_data, $this->_inherited, $this->_processed] = [[],[],[]];
         $scope = $givenScope ? $givenScope :  $this->_configScope->getCurrentScope();
-        if (false === isset($this->_loadedScopes[$scope])) {
-            $index = array_search($scope, $this->_scopePriorityScheme, true);
-            /**
-             * Force current scope to be at the end of the scheme to ensure that default priority scopes are loaded.
-             * Mostly happens when the current scope is primary.
-             * For instance if the default scope priority scheme is [primary, global] and current scope is primary,
-             * the resulted scheme will be [global, primary] so global scope is loaded.
-             */
-            if ($index !== false) {
-                unset($this->_scopePriorityScheme[$index]);
-            }
-            $this->_scopePriorityScheme[] = $scope;
-
-            $cacheId = implode('|', $this->_scopePriorityScheme) . "|" . $this->_cacheId;
-            $configData = $this->configLoader->load($cacheId);
-
-            if ($configData) {
-                [$this->_data, $this->_inherited, $this->_processed] = $configData;
-                $this->_loadedScopes[$scope] = true;
-            } else {
-                $data = $this->_cache->load($cacheId);
-                if ($data) {
-                    [$this->_data, $this->_inherited, $this->_processed] = $this->serializer->unserialize($data);
-                    foreach ($this->_scopePriorityScheme as $scopeCode) {
-                        $this->_loadedScopes[$scopeCode] = true;
-                    }
-                } else {
-                    [
-                        $virtualTypes,
-                        $this->_scopePriorityScheme,
-                        $this->_loadedScopes,
-                        $this->_data,
-                        $this->_inherited,
-                        $this->_processed
-                    ] = $this->pluginListGenerator->loadScopedVirtualTypes(
-                        $this->_scopePriorityScheme,
-                        $this->_loadedScopes,
-                        $this->_data,
-                        $this->_inherited,
-                        $this->_processed
-                    );
-                    foreach ($virtualTypes as $class) {
-                        $this->_inheritPlugins($class);
-                    }
-                    foreach ($this->getClassDefinitions() as $class) {
-                        $this->_inheritPlugins($class);
-                    }
-                    $this->_cache->save(
-                        $this->serializer->serialize([$this->_data, $this->_inherited, $this->_processed]),
-                        $cacheId
-                    );
-                }
-            }
-            $this->_pluginInstances = [];
+        $this->_scopePriorityScheme = [$scope];
+        
+        [
+            $virtualTypes,
+            $this->_scopePriorityScheme,
+            $this->_loadedScopes,
+            $this->_data,
+            $this->_inherited,
+            $this->_processed
+        ] = $this->pluginListGenerator->loadScopedVirtualTypes(
+            $this->_scopePriorityScheme,
+            $this->_loadedScopes,
+            $this->_data,
+            $this->_inherited,
+            $this->_processed
+        );
+        foreach ($virtualTypes as $class) {
+            $this->_inheritPlugins($class);
         }
-    }
-
-    /**
-     * Whether scope code is current scope code
-     *
-     * @param string $scopeCode
-     * @return bool
-     */
-    protected function isCurrentScope($scopeCode)
-    {
-        return $this->_configScope->getCurrentScope() === $scopeCode;
+        foreach ($this->getClassDefinitions() as $class) {
+            $this->_inheritPlugins($class);
+        }
     }
 
     /**
@@ -307,17 +274,6 @@ class PluginList extends Scoped  {
     }
 
     /**
-     * Merge configuration
-     *
-     * @param array $config
-     * @return void
-     */
-    public function merge(array $config)
-    {
-        $this->_data = $this->pluginListGenerator->merge($config, $this->_data);
-    }
-
-    /**
      * Collect parent types configuration for requested type
      *
      * @param string $type
@@ -328,17 +284,4 @@ class PluginList extends Scoped  {
          return $this->pluginListGenerator->inheritPlugins($type, $this->_data, $this->_inherited, $this->_processed);
          
     }
-
-    /**
-     * Sort items
-     *
-     * @param array $itemA
-     * @param array $itemB
-     * @return int
-     */
-    protected function _sort($itemA, $itemB)
-    {
-        return ($itemA['sortOrder'] ?? PHP_INT_MIN) - ($itemB['sortOrder'] ?? PHP_INT_MIN);
-    }
-
 }
