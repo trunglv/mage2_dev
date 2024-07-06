@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Magento\Framework\Module\Dir;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
+use Magento\Framework\Filesystem\Driver\File as FileDriver;
 /**
  * Deploy Static File
  */
@@ -97,7 +98,8 @@ class DeployStaticFile extends Command
         ConfigLoaderInterface $configLoader,
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Store\Model\Config\StoreView $storeView,
-        \Magento\Framework\Module\Dir $moduleDir
+        \Magento\Framework\Module\Dir $moduleDir,
+        protected FileDriver $fileDriver
     ) {
         $this->state = $state;
         $this->publisher = $publisher;
@@ -122,36 +124,45 @@ class DeployStaticFile extends Command
             self::FILE_PATH,
             '-f',
             InputOption::VALUE_REQUIRED,
-            "File Path/ Directory Path: --f js/view/shipping-address/address-renderer/default.js --f js"
+            "File Path/ Directory Path: for specific file -f js/view/shipping-address/address-renderer/default.js OR for a specific folder -f js"
         ),
             new InputOption(
                 self::THEME_PATH,
                 '-t',
                 InputOption::VALUE_REQUIRED,
-                'Theme path: --t Magento/luna'
+                'Theme path: -t Magento/luna'
             ),
             new InputOption(
                 self::AREA_CODE,
                 '-a',
                 InputOption::VALUE_REQUIRED,
-                'Area Code: --a frontend|adminhtml'
+                'Area Code: -a frontend|adminhtml'
             ),
             new InputOption(
                 self::MODULE_NAME,
                 '-m',
                 InputOption::VALUE_OPTIONAL,
-                'Module name: --m Magento_Checkout'
+                'Module name: -m Magento_Checkout'
             ),
             new InputOption(
                 self::LOCALE_CODE,
                 '-l',
                 InputOption::VALUE_OPTIONAL,
-                'Locale code: --l da_DK '
+                'Locale code: -l da_DK '
             )
         ];
         
         $this->setName('beta_dev:deploy_static');
-        $this->setDescription('Deploy a static file');
+        $this->setDescription("Deploy a static file.". 
+            PHP_EOL . "  ---> Deploy static files from a/an module/extension.".
+            PHP_EOL . "  E.g. bin/magento beta_dev:deploy_static -f js/view/shipping-address/address-renderer/default.js -t Magento/luna -m Magento_Checkout".
+            PHP_EOL . "  ---> Deploy Css files base on a theme base Magento-Luna architecure.".
+            PHP_EOL . "  E.g. bin/magento beta_dev:deploy_static -f css/styles-l.css -t Magento/luna".
+            PHP_EOL . "  E.g. bin/magento beta_dev:deploy_static -f css/styles-m.css -t Magento/luna".
+            PHP_EOL . "  ---> Deploy JS Translation Json File base on a theme base Magento-Luna architecure.".
+            PHP_EOL . "  E.g. bin/magento   beta_dev:deploy_static -t Magento/blank -f js-translation.json"
+        );
+            
         $this->setDefinition($options);
         parent::configure();
     }
@@ -163,8 +174,8 @@ class DeployStaticFile extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!($file = $input->getOption(self::FILE_PATH)) || !($themeName = $input->getOption(self::THEME_PATH))) {
-            $output->writeln("Please provide either a file name and theme name");
-            return 0;
+            $output->writeln("Please provide either a file name and theme name. Type bin/magento beta_dev:deploy_static --help for more information.");
+            return self::FAILURE;
         }
             
         //$this->output = $output;
@@ -211,10 +222,17 @@ class DeployStaticFile extends Command
             $files = [$file];
         }
 
-        $publishAssetClosure = \Closure::fromCallable([$this, 'executeAsset']);
-        array_walk($files, $publishAssetClosure);
-        $this->tableOutput->render();
-        return 1;
+        try {
+            $publishAssetClosure = \Closure::fromCallable([$this, 'executeAsset']);
+            array_walk($files, $publishAssetClosure);
+            $this->tableOutput->render();
+            return self::SUCCESS;
+            
+        } catch (\Exception $ex) {
+            $output->writeln(sprintf("Has a problem while to proceed the file %s: %s", $file, $ex->getMessage()) . PHP_EOL);
+        }
+        return self::FAILURE;
+        
     }
 
     /**
@@ -244,19 +262,16 @@ class DeployStaticFile extends Command
                 $absolutePath = $dir->getAbsolutePath($asset->getPath());
                 if ($dir->isExist($asset->getPath())) {
                     if(file_exists($absolutePath)) {
-                        @unlink($absolutePath);
+                        $this->fileDriver->deleteFile($absolutePath);
                     }
                 }
                 $this->publisher->publish($asset);
-                //$this->output->writeln(sprintf("Proceed the file %s", $absolutePath) .PHP_EOL);
                 $this->tableOutput->addRow([ str_replace($rootPath, "", $asset->getSourceFile()) , $absolutePath]);
 
             }catch(\Exception $ex){
-               
-                //$this->output->writeln(sprintf("Has a problem while to proceed the file %s: %s", $file, $ex->getMessage()) . PHP_EOL);
+               throw $ex;
             }
             
-            //exit;
         }
         $this->tableOutput->addRow(new TableSeparator());
         return $file;
