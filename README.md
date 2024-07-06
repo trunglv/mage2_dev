@@ -19,7 +19,36 @@ bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSa
 ```
 
 Examples of results:
-![image](https://github.com/trunglv/mage2_dev/assets/820411/15ec3707-776e-4ab9-a8be-1ef11e0bb10c)
+
+<pre>bin/magento beta_dev:show_plugins -t &apos;Magento\Quote\Api\CartManagementInterface&apos;
+<font color="#EF2929"><u style="text-decoration-style:single"><b> ------Plugins for Scope global------ </b></u></font>
+
+<font color="#8AE234"><u style="text-decoration-style:single"><b>Plugins for type Magento\Quote\Api\CartManagementInterface</b></u></font>
+
++--------------------+-----------------+--------------------+--------------------------------------------------+---------------+
+|<font color="#4E9A06"> code               </font>|<font color="#4E9A06"> original_method </font>|<font color="#4E9A06"> plugin_method_type </font>|<font color="#4E9A06"> instance                                         </font>|<font color="#4E9A06"> method_exists </font>|
++--------------------+-----------------+--------------------+--------------------------------------------------+---------------+
+| order_cancellation | placeOrder      | around             | PayPal\Braintree\Plugin\OrderCancellation        | method is ok  |
+| order_update       | placeOrder      | before             | Magento\PaymentServicesPaypal\Plugin\OrderUpdate | method is ok  |
++--------------------+-----------------+--------------------+--------------------------------------------------+---------------+
+<font color="#8AE234"><u style="text-decoration-style:single"><b>Plugins for type Magento\Quote\Model\QuoteManagement</b></u></font>
+
++----------------------------------+-----------------+--------------------+------------------------------------------------------------+---------------+
+|<font color="#4E9A06"> code                             </font>|<font color="#4E9A06"> original_method </font>|<font color="#4E9A06"> plugin_method_type </font>|<font color="#4E9A06"> instance                                                   </font>|<font color="#4E9A06"> method_exists </font>|
++----------------------------------+-----------------+--------------------+------------------------------------------------------------+---------------+
+| update_bundle_quote_item_options | submit          | before             | Magento\Bundle\Plugin\Quote\UpdateBundleQuoteItemOptions   | method is ok  |
+| validate_purchase_order_number   | submit          | before             | Magento\OfflinePayments\Plugin\ValidatePurchaseOrderNumber | method is ok  |
+| coupon_uses_increment_plugin     | submit          | around             | Magento\SalesRule\Plugin\CouponUsagesIncrement             | method is ok  |
++----------------------------------+-----------------+--------------------+------------------------------------------------------------+---------------+
+
+<font color="#EF2929"><u style="text-decoration-style:single"><b> ----- END Plugins for Scope ------global</b></u></font>
+-- No specific scoped plugins injected for Magento\Quote\Api\CartManagementInterfaces in frontend --
+-- No specific scoped plugins injected for Magento\Quote\Api\CartManagementInterfaces in adminhtml --
+-- No specific scoped plugins injected for Magento\Quote\Api\CartManagementInterfaces in webapi_rest --
+-- No specific scoped plugins injected for Magento\Quote\Api\CartManagementInterfaces in graphql --
+</pre>
+
+
 
 When you find plugins for an interface 'Magento\Quote\Api\CartManagementInterface', it will show plugins that are injected into the interface itself and a preference concrete class 'Magento\Quote\Model\QuoteManagement'. 
 
