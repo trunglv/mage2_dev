@@ -136,26 +136,30 @@ class PluginList extends Scoped  {
      */
     public function getPlugins($type, $scope) : array{
         $this->_loadScopedData($scope);
-        $fullWillCheckClasses = [$type];
+        $checkedClasses = [$type];
         if (interface_exists($type)) {
             $concreteType = $this->_omConfig->getPreference($type);
             $concreteType = str_replace("\Interceptor", "", $concreteType);
-            $fullWillCheckClasses[] = $concreteType;
+            $checkedClasses[] = $concreteType;
         }
         if (class_exists($type) && !interface_exists($type)) {
             $parentClasses = $this->_relations->getParents($type);
             if ($parentClasses) {
-                $fullWillCheckClasses = array_merge($fullWillCheckClasses, $parentClasses);
+                $checkedClasses = array_merge($checkedClasses, $parentClasses);
             }
         }
         $plugins = [];
-        foreach ($fullWillCheckClasses as $specificType) {
+        foreach ($checkedClasses as $specificType) {
+            /*
             $pluginDefinition = [];
             if (!isset($this->_inherited[$specificType]) && !array_key_exists($type, $this->_inherited)) {
+                $pluginDefinition = $this->_inherited[$specificType];
+            } else {
                 $pluginDefinition = $this->_data[$specificType];
             }
+            */
             $me = $this;
-            if($pluginDefinition){
+            if(isset($this->_data[$specificType]) && $pluginDefinition = $this->_data[$specificType]){
                 $plugins[$specificType] = [];
                 array_walk($pluginDefinition, function($item, $key) use ($me, &$plugins, $specificType) {            
                     $methods = $me->getPluginMethods($item['instance']);
@@ -171,8 +175,45 @@ class PluginList extends Scoped  {
                 },[]);
             }
         }
-        
-        
+        return $plugins;
+    }
+
+    /**
+     * Get Plugins by listener type ['around','before','after']
+     *
+     * @param string $pluginType
+     * @param string $scope
+     * @return []
+     */
+    public function getPluginsByListenerType($pluginListenerType, $scope)
+    {
+        $this->_loadScopedData($scope);
+        $me = $this;
+        $plugins = [];
+        array_walk($this->_data, function($pluginList, $classType) use ($me, &$plugins, $pluginListenerType) {            
+            if ($pluginList && count($pluginList)) {
+                foreach ($pluginList as $pluginName => $pluginItem) {
+                    if (!isset($pluginItem['instance'])) {
+                        continue;
+                    }
+                    $methods = $me->getPluginMethods($pluginItem['instance']);
+                    foreach($methods as $methodName => $methodType){
+                        if ($pluginListenerType != $me->getPluginMethodType($methodType)) {
+                            continue;
+                        }
+                        $plugins[] = [
+                            'class' => $classType,
+                            'code' => $pluginName,
+                            'original_method' => $methodName,
+                            //'plugin_method_type' => $me->getPluginMethodType($methodType),
+                            'instance' => $pluginItem['instance'],
+                            //'method_exists' => $me->isInjectedMethodExists($classType, $methodName) ? 'method is ok' : 'method does not exist'
+                        ];
+                    }
+                }
+            }
+            
+        },[]);
         return $plugins;
     }
 
@@ -199,15 +240,17 @@ class PluginList extends Scoped  {
      * @return boolean
      */
     protected function isInjectedMethodExists($instanceType, $pluginMethod){
-       
-        //var_dump($pluginMethod);exit;
-        //$methods = get_class_methods($pluginMethod);
-        $class = new \ReflectionClass($instanceType);
-        $methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
+        try {
+            $class = new \ReflectionClass($instanceType);
+            $methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
+            
+            return count(array_filter($methods, function($method) use ($pluginMethod) {
+                return $method->getName() == $pluginMethod;
+            })) > 0  ? true : false ;
+        } catch (\Exception $ex) {
+            return false;
+        }
         
-        return count(array_filter($methods, function($method) use ($pluginMethod) {
-            return $method->getName() == $pluginMethod;
-        })) > 0  ? true : false ;
     }
 
     /**
@@ -229,7 +272,7 @@ class PluginList extends Scoped  {
     }
 
     /**
-     * Load configuration for current scope
+     * Load configuration for the current scope
      *
      * @return void
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
