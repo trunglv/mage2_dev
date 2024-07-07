@@ -67,8 +67,8 @@ class ShowPlugins extends Command{
     public function execute(InputInterface $input, OutputInterface $output){
        
         if (!$objectType = $input->getOption(self::OBJECT_TYPE)) {
-            $output->writeln("Please input a class name for a type, example --t 'Magento\Quote\Api\CartManagementInterface' ");
-            return self::FAILURE; 
+            $output->writeln("Please input a class name for a type, example bin/magento beta_dev:show_plugins -t 'Magento\Quote\Api\CartManagementInterface' ");
+            return Command::FAILURE; 
         }
         $scopes = $input->getOption(self::SCOPE_CODE) 
             ? [$input->getOption(self::SCOPE_CODE)] :
@@ -110,7 +110,7 @@ class ShowPlugins extends Command{
             
         }
         
-        return self::SUCCESS;
+        return Command::SUCCESS;
     }
 
 }
