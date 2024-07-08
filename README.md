@@ -15,7 +15,7 @@ composer require trunglv/mage2-dev:dev-main [Recommend]
 ### 0. List all plugins by their listener type [before, around, after]
 Example:
 ```
-bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSalableForRequestedQty"
+bin/magento beta_dev:show_plugins_by_listener_type -t around
 ```
 <pre><font color="#EF2929"><u style="text-decoration-style:single"><b>------Plugins for Scope graphql------ </b></u></font>
 
