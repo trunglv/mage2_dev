@@ -11,6 +11,29 @@ composer require trunglv/mage2-dev:dev-main [Recommend]
 ```
 
 ## Debug tools
+
+### 0. List all plugins by their listener type [before, around, after]
+Example:
+```
+bin/magento beta_dev:show_plugins -t "Magento\InventorySales\Model\AreProductsSalableForRequestedQty"
+```
+<pre><font color="#EF2929"><u style="text-decoration-style:single"><b>------Plugins for Scope graphql------ </b></u></font>
+
++------------------------------------------------------------------+-----------------------------------------------------------------------+-----------------+--------------------------------------------------------------------------------------------------------------------+
+|<font color="#4E9A06"> class                                                            </font>|<font color="#4E9A06"> code                                                                  </font>|<font color="#4E9A06"> original_method </font>|<font color="#4E9A06"> instance                                                                                                           </font>|
++------------------------------------------------------------------+-----------------------------------------------------------------------+-----------------+--------------------------------------------------------------------------------------------------------------------+
+| Magento\Framework\GraphQl\Query\ResolverInterface                | cacheResolverResult                                                   | resolve         | Magento\GraphQlResolverCache\Model\Plugin\Resolver\Cache                                                           |
+| Magento\Framework\Mail\Template\TransportBuilder                 | graphQlEmulateEmail                                                   | getTransport    | Magento\StoreGraphQl\Plugin\LocalizeEmail                                                                          |
+| Magento\Framework\App\FrontControllerInterface                   | front-controller-builtin-cache                                        | dispatch        | Magento\PageCache\Model\App\FrontController\BuiltinPlugin                                                          |
+| Magento\InventoryIndexer\Model\ResourceModel\GetStockItemData    | inventory_catalog_get_legacy_stock_item_data_from_stock_registry      | execute         | Magento\InventoryCatalog\Plugin\InventoryIndexer\Model\ResourceModel\GetLegacyStockStatusDataFromStockRegistry     |
+| Magento\InventoryIndexer\Model\ResourceModel\GetStockItemsData   | inventory_catalog_get_bulk_legacy_stock_item_data_from_stock_registry | execute         | Magento\InventoryCatalog\Plugin\InventoryIndexer\Model\ResourceModel\GetBulkLegacyStockStatusDataFromStockRegistry |
+| Magento\InventoryConfiguration\Model\GetLegacyStockItem          | inventory_catalog_get_legacy_stock_item_from_stock_registry           | execute         | \Magento\InventoryCatalog\Plugin\InventoryConfiguration\Model\GetLegacyStockItemFromStockRegistry                  |
+| Magento\ConfigurableProduct\Model\Product\Type\Configurable      | used_products_cache_graphql                                           | getUsedProducts | Magento\ConfigurableProduct\Model\Plugin\Frontend\UsedProductsCache                                                |
+| Magento\InventorySales\Model\AreProductsSalable                  | are_products_salable                                                  | execute         | Magento\InventoryIndexer\Plugin\InventorySales\AreProductsSalable                                                  |
+| Magento\ReCaptchaValidationApi\Api\ValidatorInterface            | graphql_recaptcha_validation_override                                 | isValid         | Magento\ReCaptchaWebapiGraphQl\Plugin\ValidationOverrider                                                          |
+| Magento\CatalogGraphQl\Model\Resolver\Layer\DataProvider\Filters | add_swatch_data_to_filters                                            | getData         | Magento\SwatchesGraphQl\Plugin\Filters\DataProviderPlugin                                                          |
++------------------------------------------------------------------+-----------------------------------------------------------------------+-----------------+--------------------------------------------------------------------------------------------------------------------+
+</pre>
 ### 1. List all plugins for a class
 Example:
 ```
