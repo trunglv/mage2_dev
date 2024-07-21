@@ -1,9 +1,9 @@
 {
     "name": "trunglv/mage2-dev",
-    "description": "CLI tools for Magento 2 Development and Deployment",
+    "description": "A few tools to understand Magento2",
     "type": "magento2-module",
     "require": {
-        "php": ">=7.0"
+        "php": ">=8.0"
     },
     "version": "0.0.1",
     "autoload": {
