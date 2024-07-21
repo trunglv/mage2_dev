@@ -11,7 +11,25 @@ composer require trunglv/mage2-dev:dev-main [Recommend]
 ```
 
 ## Debug tools
+### -1. Dependency Injection checking
 
+```
+php bin/magento beta_dev:check_di -t "Magento\Quote\Model\QuoteManagement"
+```
+
+<pre>----------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
+| checkoutSession            | <span style="background-color:#CC0000"><font color="#D3D7CF">Magento\Checkout\Model\Session</font></span>                      | <font color="#4E9A06">Check possible interfaces. A class that relies on another class should interact with it through an interface! </font> | <font color="#FCE94F"><u style="text-decoration-style:single"><b>Magento\Framework\Session\SessionManagerInterface</b></u></font>                         |
+|                            |                                                     | Magento\Framework\Session\SessionManagerInterface                                                              |  ---&gt; Magento\Framework\Session\Generic\Interceptor                       |
+|                            |                                                     | Magento\Framework\ObjectManager\ResetAfterRequestInterface                                                     | <font color="#FCE94F"><u style="text-decoration-style:single"><b>Magento\Framework\ObjectManager\ResetAfterRequestInterface</b></u></font>                |
+|                            |                                                     |                                                                                                                |  ---&gt; Magento\Framework\ObjectManager\ResetAfterRequestInterface          |
++----------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
++----------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
+| customerSession            | <span style="background-color:#CC0000"><font color="#D3D7CF">Magento\Customer\Model\Session</font></span>                      | <font color="#4E9A06">Check possible interfaces. A class that relies on another class should interact with it through an interface! </font> | <font color="#FCE94F"><u style="text-decoration-style:single"><b>Magento\Framework\Session\SessionManagerInterface</b></u></font>                         |
+|                            |                                                     | Magento\Framework\Session\SessionManagerInterface                                                              |  ---&gt; Magento\Framework\Session\Generic\Interceptor                       |
+|                            |                                                     | Magento\Framework\ObjectManager\ResetAfterRequestInterface                                                     | <font color="#FCE94F"><u style="text-decoration-style:single"><b>Magento\Framework\ObjectManager\ResetAfterRequestInterface</b></u></font>                |
+|                            |                                                     |                                                                                                                |  ---&gt; Magento\Framework\ObjectManager\ResetAfterRequestInterface          |
++----------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
+</pre>
 ### 0. List all plugins by their listener type [before, around, after]
 Example:
 ```
