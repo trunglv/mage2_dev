@@ -13,7 +13,7 @@ composer require trunglv/mage2-dev:dev-main [Recommend]
 
 ## Debug tools
 ### -1. Dependency Injection checking
-**Need to run setup:di:compile first to load DI configs (for preferences) and create kinds of Interceptor and Factory classes. ** 
+** !!! Need to run setup:di:compile first to load DI configs (for preferences) and create kinds of Interceptor and Factory classes. ** 
 ```
 php bin/magento beta_dev:check_di -t "Magento\Quote\Model\QuoteManagement"
 ```
