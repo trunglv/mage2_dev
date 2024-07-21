@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
  */ 
@@ -6,7 +7,6 @@ namespace Betagento\Developer\Di\Interception;
 
 use Magento\Framework\Config\CacheInterface;
 use Magento\Framework\Config\Data\Scoped;
-use Magento\Framework\Config\ReaderInterface;
 use Magento\Framework\Config\ScopeInterface;
 use Magento\Framework\Interception\DefinitionInterface;
 use Magento\Framework\Interception\PluginListGenerator;
@@ -14,116 +14,46 @@ use Magento\Framework\Interception\ObjectManager\ConfigInterface;
 use Magento\Framework\ObjectManager\RelationsInterface;
 use Magento\Framework\ObjectManager\DefinitionInterface as ClassDefinitions;
 use Magento\Framework\ObjectManagerInterface;
-use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Serialize\Serializer\Serialize;
-use Magento\Framework\App\Area;
-
+use Betagento\Developer\Model\PluginFactory as PluginItemDataFactory;
+use Betagento\Developer\Model\Plugin as PluginItemData;
 
 class PluginList extends Scoped  {
 
    
-     /**
+    /**
      * Inherited plugin data
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_inherited = [];
+    protected array $_inherited = [];
 
     /**
      * Inherited plugin data, preprocessed for read
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_processed;
+    protected array $_processed;
 
-    /**
-     * Type config
-     *
-     * @var ConfigInterface
-     */
-    protected $_omConfig;
-
-    /**
-     * Class relations information provider
-     *
-     * @var RelationsInterface
-     */
-    protected $_relations;
-
-    /**
-     * List of interception methods per plugin
-     *
-     * @var DefinitionInterface
-     */
-    protected $_definitions;
-
-    /**
-     * List of interceptable application classes
-     *
-     * @var ClassDefinitions
-     */
-    protected $_classDefinitions;
-
-    /**
-     * @var \Magento\Framework\ObjectManagerInterface
-     */
-    protected $_objectManager;
-
-    /**
-     * @var array
-     */
-    protected $_pluginInstances = [];
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-
-    /**
-     * @var PluginListGenerator
-     */
-    private $pluginListGenerator;
-
-    /**
-     * Constructor
-     *
-     * @param ReaderInterface $reader
-     * @param ScopeInterface $configScope
-     * @param CacheInterface $cache
-     * @param ConfigInterface $omConfig
-     * @param DefinitionInterface $definitions
-     * @param ObjectManagerInterface $objectManager
-     * @param ClassDefinitions $classDefinitions
-     * @param array $scopePriorityScheme
-     * @param string|null $cacheId
-     * @param SerializerInterface|null $serializer
-     * @param PluginListGenerator|null $pluginListGenerator
-     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
-     */
+    
+    
     public function __construct(
-        \Magento\Framework\ObjectManager\Config\Reader\Dom $reader,
-        ScopeInterface $configScope,
-        CacheInterface $cache,
-        RelationsInterface $relations,
-        ConfigInterface $omConfig,
-        DefinitionInterface $definitions,
-        ObjectManagerInterface $objectManager,
-        ClassDefinitions $classDefinitions,
-        array $scopePriorityScheme = ['global'],
-        $cacheId = 'plugins',
-        SerializerInterface $serializer = null,
-        PluginListGenerator $pluginListGenerator = null
+        protected ScopeInterface $configScope,
+        protected CacheInterface $cache,
+        protected RelationsInterface $_relations,
+        protected ConfigInterface $_omConfig,
+        protected ClassDefinitions $_classDefinitions,
+        protected ObjectManagerInterface $_objectManager,
+        protected ClassDefinitions $classDefinitions,
+        protected DefinitionInterface $_intercepClassdefinitions,
+        protected PluginItemDataFactory $pluginFactory,
+        protected PluginListGenerator $pluginListGenerator,
+        protected $cacheId = 'plugins'
     ) {
-        $this->serializer = $serializer ?: $objectManager->get(Serialize::class);
-        parent::__construct($reader, $configScope, $cache, $cacheId, $this->serializer);
-        $this->_omConfig = $omConfig;
-        $this->_relations = $relations;
-        $this->_definitions = $definitions;
-        $this->_classDefinitions = $classDefinitions;
-        $this->_scopePriorityScheme = $scopePriorityScheme;
-        $this->_objectManager = $objectManager;
-        $this->pluginListGenerator = $pluginListGenerator ?: $this->_objectManager->get(PluginListGenerator::class);
+        $this->_scopePriorityScheme = ['global'];
+        $serializer = $_objectManager->get(Serialize::class);
+        $reader = $_objectManager->create(\Magento\Framework\ObjectManager\Config\Reader\Dom::class);
+        parent::__construct($reader, $this->configScope, $cache, $cacheId, $serializer);
     }
 
     
@@ -132,10 +62,12 @@ class PluginList extends Scoped  {
      *
      * @param string $type
      * @param string $scope
-     * @return array
+     * @return array<int|string, array<int<0, max>, \Betagento\Developer\Model\Plugin>>
      */
-    public function getPlugins($type, $scope) : array{
+    public function getPlugins($type, $scope) : array {
+
         $this->_loadScopedData($scope);
+        
         $checkedClasses = [$type];
         if (interface_exists($type)) {
             $concreteType = $this->_omConfig->getPreference($type);
@@ -148,29 +80,27 @@ class PluginList extends Scoped  {
                 $checkedClasses = array_merge($checkedClasses, $parentClasses);
             }
         }
+        
         $plugins = [];
         foreach ($checkedClasses as $specificType) {
-            /*
-            $pluginDefinition = [];
-            if (!isset($this->_inherited[$specificType]) && !array_key_exists($type, $this->_inherited)) {
-                $pluginDefinition = $this->_inherited[$specificType];
-            } else {
-                $pluginDefinition = $this->_data[$specificType];
-            }
-            */
             $me = $this;
             if(isset($this->_data[$specificType]) && $pluginDefinition = $this->_data[$specificType]){
                 $plugins[$specificType] = [];
-                array_walk($pluginDefinition, function($item, $key) use ($me, &$plugins, $specificType) {            
+                array_walk($pluginDefinition, function($item, $key) use ($me, &$plugins, $specificType, $scope) {            
                     $methods = $me->getPluginMethods($item['instance']);
                     foreach($methods as $methodName => $methodType){
-                        $plugins[$specificType][] = [
-                            'code' => $key,
-                            'original_method' => $methodName,
-                            'plugin_method_type' => $me->getPluginMethodType($methodType),
-                            'instance' => $item['instance'],
-                            'method_exists' => $me->isInjectedMethodExists($specificType, $methodName) ? 'method is ok' : 'method does not exist'
-                        ];
+                        $plugins[$specificType][] = 
+                        $this->pluginFactory->create(
+                            [
+                                'data' => [
+                                    'code' => $key,
+                                    'original_method' => $methodName,
+                                    'plugin_method_type' => $me->getPluginMethodType($methodType),
+                                    'instance' => $item['instance'],
+                                    'method_exists' => $me->isInjectedMethodExists($specificType, $methodName) ? 'method is ok' : 'method does not exist',
+                                    'scope' => $scope
+                                ]
+                            ]);
                     }
                 },[]);
             }
@@ -181,16 +111,16 @@ class PluginList extends Scoped  {
     /**
      * Get Plugins by listener type ['around','before','after']
      *
-     * @param string $pluginType
+     * @param string $pluginListenerType
      * @param string $scope
-     * @return []
+     * @return array<PluginItemData>
      */
     public function getPluginsByListenerType($pluginListenerType, $scope)
     {
         $this->_loadScopedData($scope);
         $me = $this;
         $plugins = [];
-        array_walk($this->_data, function($pluginList, $classType) use ($me, &$plugins, $pluginListenerType) {            
+        array_walk($this->_data, function($pluginList, $classType) use ($me, &$plugins, $pluginListenerType, $scope) {            
             if ($pluginList && count($pluginList)) {
                 foreach ($pluginList as $pluginName => $pluginItem) {
                     if (!isset($pluginItem['instance'])) {
@@ -201,14 +131,19 @@ class PluginList extends Scoped  {
                         if ($pluginListenerType != $me->getPluginMethodType($methodType)) {
                             continue;
                         }
-                        $plugins[] = [
-                            'class' => $classType,
-                            'code' => $pluginName,
-                            'original_method' => $methodName,
-                            //'plugin_method_type' => $me->getPluginMethodType($methodType),
-                            'instance' => $pluginItem['instance'],
-                            //'method_exists' => $me->isInjectedMethodExists($classType, $methodName) ? 'method is ok' : 'method does not exist'
-                        ];
+                        $plugins[] = $this->pluginFactory->create(
+                            [
+                                'data' => [
+                                    'class' => $classType,
+                                    'code' => $pluginName,
+                                    'original_method' => $methodName,
+                                    'plugin_method_type' => $me->getPluginMethodType($methodType),
+                                    'instance' => $pluginItem['instance'],
+                                    'method_exists' => $me->isInjectedMethodExists($classType, $methodName) ? 'method is ok' : 'method does not exist',
+                                    'scope' => $scope
+                                ]
+                            ]
+                        );
                     }
                 }
             }
@@ -221,15 +156,14 @@ class PluginList extends Scoped  {
      * Get all plugin methods
      *
      * @param string $pluginInstanceName
-     * @return []
+     * @return array<string>
      */
     protected function getPluginMethods($pluginInstanceName){
         $pluginType = $this->_omConfig->getOriginalInstanceType($pluginInstanceName);
-        
         if (!class_exists($pluginType)) {
             throw new \InvalidArgumentException('Plugin class ' . $pluginInstanceName . ' doesn\'t exist');
         }
-        return $this->_definitions->getMethodList($pluginInstanceName);
+        return $this->_intercepClassdefinitions->getMethodList($pluginInstanceName);
     }
 
     /**
@@ -239,8 +173,9 @@ class PluginList extends Scoped  {
      * @param string $pluginMethod
      * @return boolean
      */
-    protected function isInjectedMethodExists($instanceType, $pluginMethod){
+    protected function isInjectedMethodExists(string $instanceType, $pluginMethod){
         try {
+           
             $class = new \ReflectionClass($instanceType);
             $methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
             
@@ -273,7 +208,8 @@ class PluginList extends Scoped  {
 
     /**
      * Load configuration for the current scope
-     *
+     * 
+     * @param string $givenScope
      * @return void
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
@@ -309,7 +245,7 @@ class PluginList extends Scoped  {
     /**
      * Returns class definitions
      *
-     * @return array
+     * @return array<string>
      */
     protected function getClassDefinitions()
     {
@@ -320,7 +256,7 @@ class PluginList extends Scoped  {
      * Collect parent types configuration for requested type
      *
      * @param string $type
-     * @return array
+     * @return array<mixed>
      */
     protected function _inheritPlugins($type)
     {

@@ -32,7 +32,7 @@ class Reflection
     /**
      * Cache all Reflected Interfaces
      *
-     * @var array
+     * @var array<string>
      */
     protected $_alreadyReflectedInterfaces = [];
 
@@ -60,12 +60,19 @@ class Reflection
 
         $meta = [];
         $servicesRoutes = $this->webapiConfig->getServices()[ConfigConverter::KEY_ROUTES];
-        $serviceInfo = isset($servicesRoutes[$serviceUrl]) ? $servicesRoutes[$serviceUrl] : false;
-        if(!$serviceInfo)
+        
+        $serviceRoute = isset($servicesRoutes[$serviceUrl]) ? $servicesRoutes[$serviceUrl] : false;
+        
+        if (!$serviceRoute) {
             return false;
-        $serviceInfo  = isset($serviceInfo[$httpMethod]) ? $serviceInfo[$httpMethod] : false;
-        if(!$serviceInfo)
+        }
+            
+        $serviceInfo  = isset($serviceRoute[$httpMethod]) ? $serviceRoute[$httpMethod] : false;
+        
+        if (!$serviceInfo) {
             return false;
+        }
+            
         $serviceClassName = $serviceInfo['service']['class'];
         $serviceMethodName = $serviceInfo['service']['method'];
         $meta = [
@@ -76,12 +83,17 @@ class Reflection
             ]
         ];
         $methodParams = $this->methodsMap->getMethodParams($serviceClassName, $serviceMethodName);
-        $detialMethodParams = array_map(function($item){
-            $item['type'] = $this->reflectDataType($item['type']);
-            return $item;
-        }, $methodParams);
+        
+        $detialMethodParams = array_map (
+            function ($item) {
+                $item['type'] = $this->reflectDataType($item['type']);
+                return $item;
+            }, $methodParams
+        );
+
         $meta['input'] = $detialMethodParams;
         $outputType = $this->methodsMap->getMethodReturnType($serviceClassName, $serviceMethodName);
+
         $meta['output'] = [
             'type' => $this->reflectDataType($outputType),
         ];
@@ -106,8 +118,10 @@ class Reflection
             $objectTypeRelectionString = str_replace(")","]", $objectTypeRelectionString);
             $detailType = $objectType . PHP_EOL . "---" . $objectTypeRelectionString;
             
-        }catch(\Exception $ex){
+        }catch(\Exception $ex) {
+
             $detailType = $ex->getMessage();
+
         }
         return $detailType;
     }
@@ -123,17 +137,20 @@ class Reflection
         $interfaceName = $this->objectManagerConfig->getInstanceType($interfaceName);
         $methods =  $this->methodsMap->getMethodsMap($interfaceName);
         $fields = [];
+
         foreach($methods as $method => $info){
             $fieldName  = $this->fieldNamer->getFieldNameForMethodName($method);
             if($fieldName){
                 $fields[$fieldName] = "{$fieldName}: {$info['type']}";
                 $objectType = str_replace("[]", "", $info['type']);
                 if(class_exists($objectType) || interface_exists($objectType)){
+
                     if (!in_array($objectType, $this->_alreadyReflectedInterfaces)) {
+                        
                         $fields["Reflection for type ". $objectType] = $this->getMetaFromInterface($objectType);
-                    } else {
-                        $fields["type ". $objectType] = ["Already reflected"];
-                    }   
+                        continue;
+                    }
+                    $fields["type ". $objectType] = ["Already reflected"];
                 }
             }
         }

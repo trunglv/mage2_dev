@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 /**
  * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
  */
@@ -102,7 +102,7 @@ class ActionList extends Command
         if (!($frontName = $input->getOption(self::FRONT_NAME)) || !($area = $input->getOption(self::AREA_CODE))) {
 
             $output->writeln("Front name or Area Code");
-            return 0;
+            return Command::FAILURE;
         }
 
         $actions = [];
@@ -110,7 +110,7 @@ class ActionList extends Command
             $modules = $this->routeConfig->getModulesByFrontName($frontName, $area);
         } catch (\Throwable $ex) {
             $output->writeln("Front name or Area Code is invalid!");
-            return 0;
+            return Command::FAILURE;
         }
 
         foreach ($modules as $moduleName) {
@@ -161,11 +161,12 @@ class ActionList extends Command
                     ->setRows($actions[$moduleName]);
 
                 $table->render();
-                if ($area == 'adminhtml')
+                if ($area == 'adminhtml') {
                     $output->writeln("[ADMIN_PATH_CONFIG] is 'admin' by default, but can be adjusted by Magento Configuration!");
+                }
             }
         }
-        return 1;
+        return Command::SUCCESS;
     }
 
     /**

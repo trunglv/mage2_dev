@@ -8,6 +8,7 @@
                 <!-- Debug tools-->
                <item name="beta_dev_show_plugins" xsi:type="object">Betagento\Developer\Console\Interception\ShowPlugins</item>
                <item name="beta_dev_show_plugins_by_type" xsi:type="object">Betagento\Developer\Console\Interception\ShowPluginsByListenerType</item>
+               <item name="beta_dev_check_di" xsi:type="object">Betagento\Developer\Console\Di\CheckInjectedParams</item>
                <item name="beta_show_observers" xsi:type="object">Betagento\Developer\Console\Observer\ShowObservers</item>
                <item name="beta_show_action_list" xsi:type="object">Betagento\Developer\Console\Controller\ActionList</item> 
                

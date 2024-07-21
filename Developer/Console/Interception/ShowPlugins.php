@@ -1,7 +1,9 @@
 <?php 
 /**
  * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
- */ 
+ */
+declare(strict_types=1);
+
 namespace Betagento\Developer\Console\Interception;
 
 use Symfony\Component\Console\Command\Command;
@@ -64,7 +66,7 @@ class ShowPlugins extends Command{
      * @param OutputInterface $output
      * @return int
      */
-    public function execute(InputInterface $input, OutputInterface $output){
+    public function execute(InputInterface $input, OutputInterface $output) {
        
         if (!$objectType = $input->getOption(self::OBJECT_TYPE)) {
             $output->writeln("Please input a class name for a type, example bin/magento beta_dev:show_plugins -t 'Magento\Quote\Api\CartManagementInterface' ");
@@ -75,6 +77,7 @@ class ShowPlugins extends Command{
             [Area::AREA_GLOBAL, Area::AREA_FRONTEND, Area::AREA_ADMINHTML, Area::AREA_WEBAPI_REST, Area::AREA_GRAPHQL] ;
         
         foreach ($scopes as $scope) {
+
             $plugins = $this->pluginCollector->getPlugins(($objectType), strval($scope));
             if (!count($plugins)) {
                 $output->writeln(sprintf("-- No specific scoped plugins injected for %ss in %s --", $objectType, $scope));
@@ -86,31 +89,35 @@ class ShowPlugins extends Command{
             $output->writeln("");
             
             foreach ($plugins as $type => $pluginTable) {
+                if ( count($pluginTable) == 0 ) {
+                    $output->writeln("-- No plugins injected --");
+                    continue;
+                }
                 $greenStyle = new OutputFormatterStyle("green", null , ['bold', 'underscore']);
                 $output->getFormatter()->setStyle('green', $greenStyle);
                 $output->writeln("<green>Plugins for type ".$type."</green>");
                 $output->writeln("");
+                $showedColumns = ['code', 'plugin_method_type', 'original_method', 'instance', 'scope', 'method_exists'];
+                $table = new Table($output);
+                $table
+                    ->setHeaders($showedColumns)
+                    ->setRows( array_map (
+                        function ( $plugin ) use ($showedColumns) {
+                            $showedData = [];
+                            foreach ($showedColumns as $col) {
+                                $showedData[$col] = $plugin->getData($col);
+                            }
+                            return $showedData;
+                        }, $pluginTable ) );
 
-                if(count($pluginTable)){
-                    $table = new Table($output);
-                    $table
-                        ->setHeaders(array_keys( $pluginTable[0]) )
-                        ->setRows(array_map(function($pluginTable){
-                            return $pluginTable;
-                        }, $pluginTable ))
-                    ;
-                    $table->render();
-                }else{
-                    $output->writeln("-- No plugins injected --");
-                }
+                $table->render();
             }
             $output->writeln("");
             $output->getFormatter()->setStyle('fire', $fireOutputStyle);
             $output->writeln("<fire> ----- END Plugins for Scope ------".$scope."</fire>");
-            
         }
+        
         
         return Command::SUCCESS;
     }
-
 }

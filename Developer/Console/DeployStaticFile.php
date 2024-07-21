@@ -98,7 +98,7 @@ class DeployStaticFile extends Command
         ConfigLoaderInterface $configLoader,
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Store\Model\Config\StoreView $storeView,
-        \Magento\Framework\Module\Dir $moduleDir,
+        Dir $moduleDir,
         protected FileDriver $fileDriver
     ) {
         $this->state = $state;

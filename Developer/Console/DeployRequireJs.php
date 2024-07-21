@@ -1,7 +1,9 @@
 <?php
 /**
  * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
- */ 
+ */
+declare(strict_types=1);
+
 namespace Betagento\Developer\Console;
 
 use Symfony\Component\Console\Command\Command;
@@ -104,7 +106,7 @@ class DeployRequireJs extends Command {
         $themePath = $input->getOption(self::THEME_PATH);
         if (!$themePath){
             $output->writeln("Please provide theme path");
-            return 0;
+            return Command::FAILURE;
         }
         $output->writeln($themePath);
         $languageCodes = $this->storeView->retrieveLocales();
@@ -118,6 +120,6 @@ class DeployRequireJs extends Command {
             $this->deployRequireJsConfig->deploy('frontend', $themePath, $languageCode);
             $output->writeln("Deployed requirejs-config.js -- ". $languageCode. "-- theme: ". $themePath);
         }
-        return 1;   
+        return Command::SUCCESS;   
     }
 }
