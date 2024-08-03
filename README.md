@@ -1,5 +1,11 @@
 # mage2_dev - A few CLI tools for Magento 2 Development and Deployment 
 
+<p align="center">
+  
+  <a href="https://coveralls.io/github/trunglv/mage2_dev?branch=master"><img src="https://img.shields.io/coveralls/trunglv/mage2_dev/master.svg" alt="Code coverage" /></a>
+  <a href="https://packagist.org/packages/trunglv/mage2_dev"><img src="https://img.shields.io/packagist/dt/trunglv/mage2-dev.svg" alt="Packagist" /></a>
+  <a ><img src="https://img.shields.io/packagist/l/trunglv/mage2-dev.svg" alt="License" /></a>
+</p>
 
 ## Installation
 
