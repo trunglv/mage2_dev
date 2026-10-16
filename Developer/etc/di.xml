@@ -22,7 +22,10 @@
                -->
                <!-- API Relection-->
                <item name="api_refelection" xsi:type="object">Betagento\Developer\Console\Webapi\Reflection</item>
-               
+
+               <!-- MCP server for AI agents -->
+               <item name="beta_dev_mcp_server" xsi:type="object">Betagento\Developer\Console\Mcp\McpServer</item>
+
             </argument>
         </arguments>
     </type>
