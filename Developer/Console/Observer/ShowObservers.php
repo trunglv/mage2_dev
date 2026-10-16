@@ -70,7 +70,7 @@ class ShowObservers extends Command{
         parent::configure();
     }
 
-    public function execute(InputInterface $input, OutputInterface $output){
+    public function execute(InputInterface $input, OutputInterface $output): int{
 
         $scopes = [
             \Magento\Framework\App\Area::AREA_GLOBAL,

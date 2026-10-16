@@ -102,7 +102,7 @@ class DeployRequireJs extends Command {
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output): int {
         $themePath = $input->getOption(self::THEME_PATH);
         if (!$themePath){
             $output->writeln("Please provide theme path");

@@ -52,7 +52,7 @@ class McpServer extends Command
     /**
      * @inheritDoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // stdout carries the JSON-RPC stream; anything else must go to stderr.
         // phpcs:ignore Magento2.Functions.DiscouragedFunction -- keep PHP notices out of the protocol stream
