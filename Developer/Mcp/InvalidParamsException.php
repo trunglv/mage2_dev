@@ -1,0 +1,14 @@
+<?php
+/**
+ * @author Trung Luu <luuvantrung@gmail.com> https://github.com/trunglv/mage2_dev
+ */
+declare(strict_types=1);
+
+namespace Betagento\Developer\Mcp;
+
+/**
+ * Maps to JSON-RPC error -32602 (Invalid params).
+ */
+class InvalidParamsException extends \InvalidArgumentException
+{
+}
