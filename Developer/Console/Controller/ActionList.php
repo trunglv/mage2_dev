@@ -96,7 +96,7 @@ class ActionList extends Command
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
         if (!($frontName = $input->getOption(self::FRONT_NAME)) || !($area = $input->getOption(self::AREA_CODE))) {

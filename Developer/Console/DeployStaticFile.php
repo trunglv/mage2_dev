@@ -171,7 +171,7 @@ class DeployStaticFile extends Command
      * @inheritDoc
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!($file = $input->getOption(self::FILE_PATH)) || !($themeName = $input->getOption(self::THEME_PATH))) {
             $output->writeln("Please provide either a file name and theme name. Type bin/magento beta_dev:deploy_static --help for more information.");
@@ -207,7 +207,7 @@ class DeployStaticFile extends Command
         /*
         if (!file_exists($viewDir)) {
             $output->writeln("Can't find a file or a directory for this path : ". $viewDir);
-            return;
+            return self::FAILURE;
         }
         */
         if(is_dir($viewDir)) {

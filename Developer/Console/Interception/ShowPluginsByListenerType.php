@@ -65,7 +65,7 @@ class ShowPluginsByListenerType extends Command{
      * @param OutputInterface $output
      * @return int
      */
-    public function execute(InputInterface $input, OutputInterface $output){
+    public function execute(InputInterface $input, OutputInterface $output): int{
        
         if (!$pluginType = $input->getOption(self::PLUGIN_TYPE)) {
             $output->writeln("Please input a class name for a type, example bin/magento beta_dev:show_plugins -t around  ");

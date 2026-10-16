@@ -1,0 +1,32 @@
+{
+    "name": "betagento/mage2-dev-ci-tools",
+    "description": "Static analysis tools for CI. Magento packages come from the public Mage-OS mirror, so no repo.magento.com keys are needed.",
+    "type": "project",
+    "license": "OSL-3.0",
+    "require": {
+        "magento/framework": "^103.0",
+        "magento/module-deploy": "^100.4",
+        "magento/module-store": "^101.1",
+        "magento/module-webapi": "^100.4",
+        "magento/magento-coding-standard": "^41.0",
+        "phpmd/phpmd": "^2.15",
+        "phpstan/phpstan": "^2.1",
+        "bitexpert/phpstan-magento": "^0.44"
+    },
+    "repositories": {
+        "mageos": {
+            "type": "composer",
+            "url": "https://mirror.mage-os.org/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "magento/composer-dependency-version-audit-plugin": false,
+            "magento/inventory-composer-installer": false,
+            "magento/magento-composer-installer": false,
+            "laminas/laminas-dependency-plugin": false
+        },
+        "sort-packages": true
+    }
+}

@@ -26,6 +26,16 @@ class ToolCatalog
      */
     public function definitions(): array
     {
+        return array_merge($this->introspectionTools(), $this->deployTools());
+    }
+
+    /**
+     * Read-only tools that inspect plugins, DI, observers, routes and the Web API
+     *
+     * @return array<string, array>
+     */
+    private function introspectionTools(): array
+    {
         return [
             'show_plugins' => [
                 'command' => 'beta_dev:show_plugins',
@@ -109,6 +119,17 @@ class ToolCatalog
                     ),
                 ],
             ],
+        ];
+    }
+
+    /**
+     * Tools that write to pub/static
+     *
+     * @return array<string, array>
+     */
+    private function deployTools(): array
+    {
+        return [
             'deploy_static_file' => [
                 'command' => 'beta_dev:deploy_static',
                 'description' => 'Deploy a single static file (JS, CSS, HTML, js-translation.json) into pub/static '

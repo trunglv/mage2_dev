@@ -67,7 +67,7 @@ class CheckInjectedParams extends Command{
      * @param OutputInterface $output
      * @return int
      */
-    public function execute(InputInterface $input, OutputInterface $output){
+    public function execute(InputInterface $input, OutputInterface $output): int{
        
         if (!$objectType = $input->getOption(self::OBJECT_TYPE)) {
             $output->writeln("Please input a class name for a type, example bin/magento beta_dev:show_plugins -t 'Magento\Quote\Api\CartManagementInterface' ");

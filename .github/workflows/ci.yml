@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.3'
+  TOOLS_DIR: .github/ci-tools
+
+jobs:
+  lint:
+    name: PHP lint (${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+      - name: Lint every PHP file
+        run: |
+          status=0
+          while IFS= read -r -d '' f; do
+            out=$(php -d error_reporting=-1 -d display_errors=1 -l "$f" 2>&1) || { echo "$out"; status=1; }
+          done < <(find . -name '*.php' -not -path './.github/*' -print0)
+          exit $status
+
+  analyse:
+    name: ${{ matrix.tool }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: [Coding Standard, Mess Detector, PHPStan]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+          tools: composer:v2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: ci-tools-${{ env.PHP_VERSION }}-${{ hashFiles('.github/ci-tools/composer.json') }}
+      - name: Install analysis tools
+        working-directory: ${{ env.TOOLS_DIR }}
+        run: composer install --no-interaction --no-progress --no-scripts --ignore-platform-reqs
+
+      - name: Magento2 coding standard (fails on errors only)
+        if: matrix.tool == 'Coding Standard'
+        run: >
+          $TOOLS_DIR/vendor/bin/phpcs -q --standard=Magento2 --extensions=php,phtml
+          --ignore='.github/*' --runtime-set ignore_warnings_on_exit 1 --report=full .
+
+      - name: PHPMD with Magento rule set (older findings baselined)
+        if: matrix.tool == 'Mess Detector'
+        run: >
+          $TOOLS_DIR/vendor/bin/phpmd Developer,registration.php github phpmd.xml.dist
+          --baseline-file phpmd.baseline.xml
+
+      - name: PHPStan
+        if: matrix.tool == 'PHPStan'
+        run: >
+          php -d memory_limit=1G $TOOLS_DIR/vendor/bin/phpstan analyse
+          --no-progress --error-format=github -c phpstan.neon.dist

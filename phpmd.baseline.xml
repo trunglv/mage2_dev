@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<phpmd-baseline>
+  <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="Developer/Console/Controller/ActionList.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="Developer/Console/Controller/ActionList.php" method="execute"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="Developer/Console/Controller/ActionList.php" method="execute"/>
+  <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="Developer/Console/DeployStaticFile.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="Developer/Console/Di/CheckInjectedParams.php" method="execute"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="Developer/Console/Di/CheckInjectedParams.php" method="execute"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="Developer/Di/DiConfig.php"/>
+  <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="Developer/Di/Interception/PluginList.php"/>
+  <violation rule="PHPMD\Rule\Design\LongParameterList" file="Developer/Di/Interception/PluginList.php" method="__construct"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="Developer/Di/Interception/PluginList.php" method="getPlugins"/>
+</phpmd-baseline>

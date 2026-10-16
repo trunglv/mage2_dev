@@ -1,0 +1,13 @@
+includes:
+    - .github/ci-tools/vendor/bitexpert/phpstan-magento/extension.neon
+
+parameters:
+    level: 1
+    paths:
+        - Developer
+        - registration.php
+    bootstrapFiles:
+        - .github/ci-tools/vendor/autoload.php
+        - .github/phpstan/bootstrap.php
+    excludePaths:
+        - .github/ci-tools
