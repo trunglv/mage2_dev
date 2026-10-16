@@ -163,53 +163,25 @@ bin/magento beta_dev:api_reflection --api "/V1/carts/:cartId/shipping-informatio
 
 ## MCP server (for Claude Code and other AI agents)
 
-The module ships a [Model Context Protocol](https://modelcontextprotocol.io) server, so an AI agent can call the tools above directly.
-It speaks MCP over stdio and has no extra dependencies.
+The module includes a [Model Context Protocol](https://modelcontextprotocol.io) server, so AI agents (Claude Code, Claude Desktop, Cursor, VS Code Copilot, Codex) can call the tools above directly. It needs PHP 8.0+ and works on Magento 2.4.x and Mage-OS, including 2.4.9.
 
 ```
 bin/magento beta_dev:mcp_server [--read-only] [--timeout=300]
 ```
 
-| MCP tool | Wraps | Arguments |
-|---|---|---|
-| `show_plugins` | `beta_dev:show_plugins` | `type`*, `scope` |
-| `show_plugins_by_listener_type` | `beta_dev:show_plugins_by_listener_type` | `plugin_type`* (before/around/after), `scope` |
-| `check_di` | `beta_dev:check_di` | `type`*, `scope` |
-| `show_observers` | `beta_dev:show_observers` | `event`*, `scope` |
-| `show_controller_actions` | `beta_dev:show_controller_action` | `frontname`*, `area`* |
-| `api_reflection` | `beta_dev:api_reflection` | `api`*, `http_method`* |
-| `deploy_static_file` | `beta_dev:deploy_static` | `file`*, `theme`*, `area`, `module`, `locale` |
-| `deploy_requirejs` | `beta_dev:deploy_requirejs` | `theme`*, `locale` |
-
-\* required. `--read-only` hides the two deploy tools, which write to `pub/static`.
-
-Each tool call runs the command in a fresh `bin/magento` process, so results follow the latest `setup:di:compile` without restarting the server.
-
-### Add it to Claude Code
-
-Run from the Magento root (PHP on the host):
+Add it to Claude Code from the Magento root (PHP on the host):
 ```
 claude mcp add mage2-dev --scope project -- php bin/magento beta_dev:mcp_server
 ```
 
-Magento running in Docker (replace `fpm` with your PHP service and `/var/www/html` with the Magento root in the container). Note the `-T`: no TTY, so stdio stays clean:
+Magento in Docker: keep `-i` and never add `-t`, so the protocol stream stays clean:
 ```
-claude mcp add mage2-dev --scope project -- docker compose exec -T -w /var/www/html fpm php bin/magento beta_dev:mcp_server
-```
-
-Both write a `.mcp.json` like this, which you can also create by hand:
-```json
-{
-  "mcpServers": {
-    "mage2-dev": {
-      "command": "docker",
-      "args": ["compose", "exec", "-T", "-w", "/var/www/html", "fpm", "php", "bin/magento", "beta_dev:mcp_server"]
-    }
-  }
-}
+claude mcp add mage2-dev --scope project -- docker exec -i <php-container> php /var/www/html/bin/magento beta_dev:mcp_server
 ```
 
 Then ask things like *"which plugins wrap CartManagementInterface::placeOrder in the frontend?"* or *"what observers run on sales_order_place_after?"*.
+
+**[Full MCP guide →](docs/mcp.md)**: every tool and its arguments, configs for other clients, testing with the MCP Inspector, how it works, and troubleshooting.
 
 ## Deploy static files ( Javascript, Css, Html, Js-translation, requirejs-config.js )
 ### Before running CLI commands below - Pls ensure you have deleted the folder var/view_proccessed ( Some static files are cached in that folder)

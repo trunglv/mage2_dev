@@ -18,6 +18,10 @@ I think, This project will help developers save time in developement and deploym
 bin/magento beta_dev:deploy_static -m [your_module] -f js/[your_mixin_path] -t [your_theme]
 
 ```
+## Use it from an AI agent (MCP)
+
+The tools are also available to AI agents such as Claude Code, Cursor and VS Code Copilot through a built-in MCP server: `bin/magento beta_dev:mcp_server`. See the **[MCP guide](mcp.md)**.
+
 ## Installation
 
 ##### Clone and copy a source code into a folder app/code/Betagento 
