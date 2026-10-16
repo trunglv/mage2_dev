@@ -110,7 +110,9 @@ class CheckInjectedParams extends Command{
                 }
                 $parameter['preference'] = implode(PHP_EOL, $preferences);
 
-                if (count($parameter['parent']) > 0) {
+                // Decide once: the branch below turns 'parent' into a string.
+                $hasParents = count($parameter['parent']) > 0;
+                if ($hasParents) {
 
                     $table->addRow(new TableSeparator());
                     $parameter['type'] = "<error>".$parameter['type']. "</error>";
@@ -119,7 +121,7 @@ class CheckInjectedParams extends Command{
                     
                 }
  
-                if (count($parameter['parent']) == 0) {
+                if (!$hasParents) {
                     $parameter['parent'] = $parameter["is_interface"] == 1 ?  '<info>Ok</info>' : '---';
                     $parameter['type'] = $parameter["is_interface"] == 1 ? '<info>'.$parameter['type'].'</info>' : $parameter['type'];
                 }
