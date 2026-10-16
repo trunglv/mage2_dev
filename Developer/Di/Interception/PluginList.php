@@ -75,7 +75,8 @@ class PluginList extends Scoped  {
             $checkedClasses[] = $concreteType;
         }
         if (class_exists($type) && !interface_exists($type)) {
-            $parentClasses = $this->_relations->getParents($type);
+            // getParents() puts null first for a class with no parent class; drop it (null offsets fail on PHP 8.5)
+            $parentClasses = array_filter($this->_relations->getParents($type));
             if ($parentClasses) {
                 $checkedClasses = array_merge($checkedClasses, $parentClasses);
             }

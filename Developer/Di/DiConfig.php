@@ -30,6 +30,9 @@ class DiConfig
         $checkedParams = [];
         foreach ($parametters as $parameter) {
             list($paramName, $paramType, $paramRequired, $paramDefault, $isVariadic) = $parameter;
+            if (!is_string($paramType)) {
+                continue; // scalar/untyped parameter: nothing to resolve
+            }
             if (interface_exists($paramType)) {
                 $checkedParams[$paramName] = [
                     'error' => 0,
@@ -78,7 +81,8 @@ class DiConfig
      * @return void
      */
     protected function getDeepInterfaces($type, &$parentInterfaces = []) : void {
-        $parentClasses = $this->relations->getParents($type);
+        // getParents() puts null first for a class with no parent class; drop it (null offsets/args fail on PHP 8.5)
+        $parentClasses = array_filter($this->relations->getParents($type));
         if(!count($parentClasses)) {
             return ;
         }
