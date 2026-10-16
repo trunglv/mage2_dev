@@ -6,6 +6,10 @@ declare(strict_types=1);
 
 namespace Betagento\Developer\Mcp;
 
+// phpcs:disable Magento2.Functions.DiscouragedFunction
+// This is a CLI stdio server: it talks to its own STDIN/STDOUT and to child processes,
+// never to the Magento filesystem, so Filesystem\DriverInterface does not apply.
+
 /**
  * Minimal Model Context Protocol server over stdio (newline-delimited JSON-RPC 2.0).
  *
@@ -19,22 +23,81 @@ class Server
     public const SERVER_VERSION = '0.1.0';
     private const SUPPORTED_PROTOCOL_VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'];
     private const MAX_OUTPUT_BYTES = 200000;
+    private const JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
 
     /**
-     * @param resource $in
-     * @param resource $out
+     * @var string
+     */
+    private $phpBinary;
+
+    /**
+     * @var string
+     */
+    private $magentoBin;
+
+    /**
+     * @var string
+     */
+    private $workingDir;
+
+    /**
+     * @var bool
+     */
+    private $readOnly;
+
+    /**
+     * @var int
+     */
+    private $timeoutSeconds;
+
+    /**
+     * @var resource
+     */
+    private $in;
+
+    /**
+     * @var resource
+     */
+    private $out;
+
+    /**
+     * @var ToolCatalog
+     */
+    private $catalog;
+
+    /**
+     * @param string $phpBinary
+     * @param string $magentoBin
+     * @param string $workingDir
+     * @param bool $readOnly
+     * @param int $timeoutSeconds
+     * @param resource|null $in
+     * @param resource|null $out
      */
     public function __construct(
-        private string $phpBinary,
-        private string $magentoBin,
-        private string $workingDir,
-        private bool $readOnly = false,
-        private int $timeoutSeconds = 300,
-        private $in = STDIN,
-        private $out = STDOUT
+        string $phpBinary,
+        string $magentoBin,
+        string $workingDir,
+        bool $readOnly = false,
+        int $timeoutSeconds = 300,
+        $in = null,
+        $out = null
     ) {
+        $this->phpBinary = $phpBinary;
+        $this->magentoBin = $magentoBin;
+        $this->workingDir = $workingDir;
+        $this->readOnly = $readOnly;
+        $this->timeoutSeconds = $timeoutSeconds;
+        $this->in = $in ?? STDIN;
+        $this->out = $out ?? STDOUT;
+        $this->catalog = new ToolCatalog();
     }
 
+    /**
+     * Serve requests until STDIN closes
+     *
+     * @return void
+     */
     public function run(): void
     {
         while (($line = fgets($this->in)) !== false) {
@@ -44,7 +107,7 @@ class Server
             }
             $response = $this->handleLine($line);
             if ($response !== null) {
-                fwrite($this->out, json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE) . "\n");
+                fwrite($this->out, json_encode($response, self::JSON_FLAGS) . "\n");
                 fflush($this->out);
             }
         }
@@ -52,6 +115,9 @@ class Server
 
     /**
      * Handle one JSON-RPC message. Returns null for notifications.
+     *
+     * @param string $line
+     * @return array|null
      */
     public function handleLine(string $line): ?array
     {
@@ -72,7 +138,7 @@ class Server
                     $result = new \stdClass();
                     break;
                 case 'tools/list':
-                    $result = ['tools' => ToolCatalog::toMcpTools($this->readOnly)];
+                    $result = ['tools' => $this->catalog->toMcpTools($this->readOnly)];
                     break;
                 case 'tools/call':
                     $result = $this->callTool($params);
@@ -92,6 +158,12 @@ class Server
         return $isNotification ? null : ['jsonrpc' => '2.0', 'id' => $id, 'result' => $result];
     }
 
+    /**
+     * Answer the MCP initialize handshake
+     *
+     * @param array $params
+     * @return array
+     */
     private function initialize(array $params): array
     {
         $requested = $params['protocolVersion'] ?? null;
@@ -107,11 +179,21 @@ class Server
         ];
     }
 
+    /**
+     * Validate a tools/call request and run the mapped console command
+     *
+     * @param array $params
+     * @return array
+     * @throws InvalidParamsException
+     */
     private function callTool(array $params): array
     {
         $name = $params['name'] ?? null;
-        $definitions = ToolCatalog::definitions();
-        if (!is_string($name) || !isset($definitions[$name]) || ($this->readOnly && !$definitions[$name]['read_only'])) {
+        $definitions = $this->catalog->definitions();
+        if (!is_string($name)
+            || !isset($definitions[$name])
+            || ($this->readOnly && !$definitions[$name]['read_only'])
+        ) {
             throw new InvalidParamsException('Unknown tool: ' . (is_string($name) ? $name : '(missing)'));
         }
         $def = $definitions[$name];
@@ -119,7 +201,7 @@ class Server
 
         $argv = [$this->phpBinary, $this->magentoBin, $def['command'], '--no-ansi', '--no-interaction'];
         $problems = [];
-        foreach ($arguments as $argName => $value) {
+        foreach (array_keys($arguments) as $argName) {
             if (!isset($def['args'][$argName])) {
                 $problems[] = sprintf('unknown argument "%s"', $argName);
             }
@@ -149,49 +231,61 @@ class Server
 
         [$exitCode, $output] = $this->runProcess($argv);
         if ($exitCode !== 0) {
-            return $this->toolResult(sprintf("Command %s failed (exit code %d):\n%s", $def['command'], $exitCode, $output), true);
+            $message = sprintf("Command %s failed (exit code %d):\n%s", $def['command'], $exitCode, $output);
+            return $this->toolResult($message, true);
         }
         return $this->toolResult($output === '' ? '(no output)' : $output, false);
     }
 
     /**
+     * Run a command without a shell; return its exit code and combined, cleaned output
+     *
      * @param string[] $argv
      * @return array{0: int, 1: string}
      */
     private function runProcess(array $argv): array
     {
+        // phpcs:disable Magento2.Security.InsecureFunction
+        // proc_* is how this server runs bin/magento itself: a fixed argv array (no shell),
+        // with user input passed only as --option=value strings validated against the tool schema.
         $stderrFile = tempnam(sys_get_temp_dir(), 'mage2dev_mcp_');
-        $process = proc_open(
-            $argv,
-            [0 => ['file', '/dev/null', 'r'], 1 => ['pipe', 'w'], 2 => ['file', $stderrFile, 'w']],
-            $pipes,
-            $this->workingDir
-        );
-        if (!is_resource($process)) {
-            @unlink($stderrFile);
-            return [127, 'Unable to start process: ' . implode(' ', $argv)];
-        }
+        try {
+            $process = proc_open(
+                $argv,
+                [0 => ['file', '/dev/null', 'r'], 1 => ['pipe', 'w'], 2 => ['file', $stderrFile, 'w']],
+                $pipes,
+                $this->workingDir
+            );
+            if (!is_resource($process)) {
+                return [127, 'Unable to start process: ' . implode(' ', $argv)];
+            }
 
-        stream_set_blocking($pipes[1], false);
-        $stdout = '';
-        $deadline = time() + $this->timeoutSeconds;
-        $timedOut = false;
-        while (!feof($pipes[1])) {
-            if (time() >= $deadline) {
-                $timedOut = true;
-                proc_terminate($process, 9);
-                break;
+            stream_set_blocking($pipes[1], false);
+            $stdout = '';
+            $deadline = time() + $this->timeoutSeconds;
+            $timedOut = false;
+            while (!feof($pipes[1])) {
+                if (time() >= $deadline) {
+                    $timedOut = true;
+                    proc_terminate($process, 9);
+                    break;
+                }
+                $read = [$pipes[1]];
+                $write = null;
+                $except = null;
+                if (stream_select($read, $write, $except, 1) > 0) {
+                    $stdout .= (string) fread($pipes[1], 65536);
+                }
             }
-            $read = [$pipes[1]];
-            $write = $except = null;
-            if (@stream_select($read, $write, $except, 1) > 0) {
-                $stdout .= (string) fread($pipes[1], 65536);
+            fclose($pipes[1]);
+            $exitCode = proc_close($process);
+            $stderr = is_file($stderrFile) ? (string) file_get_contents($stderrFile) : '';
+        } finally {
+            if (is_file($stderrFile)) {
+                unlink($stderrFile);
             }
         }
-        fclose($pipes[1]);
-        $exitCode = proc_close($process);
-        $stderr = (string) @file_get_contents($stderrFile);
-        @unlink($stderrFile);
+        // phpcs:enable Magento2.Security.InsecureFunction
 
         $output = $this->cleanOutput($stdout);
         $stderr = $this->cleanOutput($stderr);
@@ -204,21 +298,43 @@ class Server
         return [$exitCode, $output];
     }
 
+    /**
+     * Strip ANSI escapes and cap the size of command output
+     *
+     * @param string $text
+     * @return string
+     */
     private function cleanOutput(string $text): string
     {
         $text = (string) preg_replace('/\e\[[0-9;?]*[A-Za-z]/', '', $text);
         $text = trim($text);
         if (strlen($text) > self::MAX_OUTPUT_BYTES) {
-            $text = substr($text, 0, self::MAX_OUTPUT_BYTES) . "\n\n[output truncated at " . self::MAX_OUTPUT_BYTES . ' bytes]';
+            $text = substr($text, 0, self::MAX_OUTPUT_BYTES)
+                . "\n\n[output truncated at " . self::MAX_OUTPUT_BYTES . ' bytes]';
         }
         return $text;
     }
 
+    /**
+     * Wrap text as an MCP tool result
+     *
+     * @param string $text
+     * @param bool $isError
+     * @return array
+     */
     private function toolResult(string $text, bool $isError): array
     {
         return ['content' => [['type' => 'text', 'text' => $text]], 'isError' => $isError];
     }
 
+    /**
+     * Build a JSON-RPC error response
+     *
+     * @param mixed $id
+     * @param int $code
+     * @param string $message
+     * @return array
+     */
     private function error($id, int $code, string $message): array
     {
         return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => $code, 'message' => $message]];
