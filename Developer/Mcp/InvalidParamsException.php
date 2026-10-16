@@ -7,8 +7,15 @@ declare(strict_types=1);
 namespace Betagento\Developer\Mcp;
 
 /**
- * Maps to JSON-RPC error -32602 (Invalid params).
+ * JSON-RPC error -32602 (Invalid params).
  */
-class InvalidParamsException extends \InvalidArgumentException
+class InvalidParamsException extends JsonRpcException
 {
+    /**
+     * @param string $message
+     */
+    public function __construct(string $message)
+    {
+        parent::__construct($message, -32602);
+    }
 }

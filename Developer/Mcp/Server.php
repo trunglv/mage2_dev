@@ -127,35 +127,42 @@ class Server
         }
         $isNotification = !array_key_exists('id', $message);
         $id = $message['id'] ?? null;
-        $params = is_array($message['params'] ?? null) ? $message['params'] : [];
 
         try {
-            switch ($message['method']) {
-                case 'initialize':
-                    $result = $this->initialize($params);
-                    break;
-                case 'ping':
-                    $result = new \stdClass();
-                    break;
-                case 'tools/list':
-                    $result = ['tools' => $this->catalog->toMcpTools($this->readOnly)];
-                    break;
-                case 'tools/call':
-                    $result = $this->callTool($params);
-                    break;
-                default:
-                    if ($isNotification) {
-                        return null; // notifications/initialized, notifications/cancelled, ...
-                    }
-                    return $this->error($id, -32601, 'Method not found: ' . $message['method']);
-            }
-        } catch (InvalidParamsException $e) {
-            return $isNotification ? null : $this->error($id, -32602, $e->getMessage());
+            $result = $this->dispatch($message['method'], $this->arrayOrEmpty($message['params'] ?? null));
+            $response = ['jsonrpc' => '2.0', 'id' => $id, 'result' => $result];
+        } catch (JsonRpcException $e) {
+            $response = $this->error($id, $e->getCode(), $e->getMessage());
         } catch (\Throwable $e) {
-            return $isNotification ? null : $this->error($id, -32603, 'Internal error: ' . $e->getMessage());
+            $response = $this->error($id, -32603, 'Internal error: ' . $e->getMessage());
         }
 
-        return $isNotification ? null : ['jsonrpc' => '2.0', 'id' => $id, 'result' => $result];
+        // Notifications (no id) never get a response, not even an error.
+        return $isNotification ? null : $response;
+    }
+
+    /**
+     * Route a request to its handler
+     *
+     * @param string $method
+     * @param array $params
+     * @return array|\stdClass
+     * @throws JsonRpcException
+     */
+    private function dispatch(string $method, array $params)
+    {
+        switch ($method) {
+            case 'initialize':
+                return $this->initialize($params);
+            case 'ping':
+                return new \stdClass();
+            case 'tools/list':
+                return ['tools' => $this->catalog->toMcpTools($this->readOnly)];
+            case 'tools/call':
+                return $this->callTool($params);
+            default:
+                throw new JsonRpcException('Method not found: ' . $method, -32601);
+        }
     }
 
     /**
@@ -188,45 +195,20 @@ class Server
      */
     private function callTool(array $params): array
     {
-        $name = $params['name'] ?? null;
-        $definitions = $this->catalog->definitions();
-        if (!is_string($name)
-            || !isset($definitions[$name])
-            || ($this->readOnly && !$definitions[$name]['read_only'])
-        ) {
-            throw new InvalidParamsException('Unknown tool: ' . (is_string($name) ? $name : '(missing)'));
-        }
-        $def = $definitions[$name];
-        $arguments = is_array($params['arguments'] ?? null) ? $params['arguments'] : [];
+        $def = $this->findTool($params['name'] ?? null);
+        $arguments = $this->arrayOrEmpty($params['arguments'] ?? null);
 
-        $argv = [$this->phpBinary, $this->magentoBin, $def['command'], '--no-ansi', '--no-interaction'];
-        $problems = [];
-        foreach (array_keys($arguments) as $argName) {
-            if (!isset($def['args'][$argName])) {
-                $problems[] = sprintf('unknown argument "%s"', $argName);
-            }
-        }
-        foreach ($def['args'] as $argName => $arg) {
-            $value = $arguments[$argName] ?? null;
-            if ($value === null || $value === '') {
-                if ($arg['required']) {
-                    $problems[] = sprintf('"%s" is required', $argName);
-                }
-                continue;
-            }
-            if (!is_string($value)) {
-                $problems[] = sprintf('"%s" must be a string', $argName);
-                continue;
-            }
-            if ($arg['enum'] && !in_array($value, $arg['enum'], true)) {
-                $problems[] = sprintf('"%s" must be one of: %s', $argName, implode(', ', $arg['enum']));
-                continue;
-            }
-            // --name=value keeps values that start with "-" from being read as options.
-            $argv[] = $arg['option'] . '=' . $value;
-        }
+        $problems = $this->validateArguments($def['args'], $arguments);
         if ($problems) {
             return $this->toolResult('Invalid arguments: ' . implode('; ', $problems), true);
+        }
+
+        $argv = [$this->phpBinary, $this->magentoBin, $def['command'], '--no-ansi', '--no-interaction'];
+        foreach ($def['args'] as $argName => $arg) {
+            if (($arguments[$argName] ?? '') !== '') {
+                // --name=value keeps values that start with "-" from being read as options.
+                $argv[] = $arg['option'] . '=' . $arguments[$argName];
+            }
         }
 
         [$exitCode, $output] = $this->runProcess($argv);
@@ -235,6 +217,67 @@ class Server
             return $this->toolResult($message, true);
         }
         return $this->toolResult($output === '' ? '(no output)' : $output, false);
+    }
+
+    /**
+     * Look up an exposed tool definition by name
+     *
+     * @param mixed $name
+     * @return array
+     * @throws InvalidParamsException
+     */
+    private function findTool($name): array
+    {
+        $definitions = $this->catalog->definitions();
+        $def = is_string($name) ? ($definitions[$name] ?? null) : null;
+        if ($def === null || ($this->readOnly && !$def['read_only'])) {
+            throw new InvalidParamsException('Unknown tool: ' . (is_string($name) ? $name : '(missing)'));
+        }
+        return $def;
+    }
+
+    /**
+     * Check call arguments against a tool's schema; returns a list of problems
+     *
+     * @param array $schema
+     * @param array $arguments
+     * @return string[]
+     */
+    private function validateArguments(array $schema, array $arguments): array
+    {
+        $problems = [];
+        foreach (array_keys(array_diff_key($arguments, $schema)) as $argName) {
+            $problems[] = sprintf('unknown argument "%s"', $argName);
+        }
+        foreach ($schema as $argName => $arg) {
+            $problem = $this->validateArgument($argName, $arg, $arguments[$argName] ?? null);
+            if ($problem !== null) {
+                $problems[] = $problem;
+            }
+        }
+        return $problems;
+    }
+
+    /**
+     * Check one argument value; returns a problem description or null when valid
+     *
+     * @param string $argName
+     * @param array $arg
+     * @param mixed $value
+     * @return string|null
+     */
+    private function validateArgument(string $argName, array $arg, $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return $arg['required'] ? sprintf('"%s" is required', $argName) : null;
+        }
+        if (!is_string($value)) {
+            return sprintf('"%s" must be a string', $argName);
+        }
+        if ($arg['enum'] && !in_array($value, $arg['enum'], true)) {
+            return sprintf('"%s" must be one of: %s', $argName, implode(', ', $arg['enum']));
+        }
+        return null;
     }
 
     /**
@@ -259,27 +302,9 @@ class Server
             if (!is_resource($process)) {
                 return [127, 'Unable to start process: ' . implode(' ', $argv)];
             }
-
-            stream_set_blocking($pipes[1], false);
-            $stdout = '';
-            $deadline = time() + $this->timeoutSeconds;
-            $timedOut = false;
-            while (!feof($pipes[1])) {
-                if (time() >= $deadline) {
-                    $timedOut = true;
-                    proc_terminate($process, 9);
-                    break;
-                }
-                $read = [$pipes[1]];
-                $write = null;
-                $except = null;
-                if (stream_select($read, $write, $except, 1) > 0) {
-                    $stdout .= (string) fread($pipes[1], 65536);
-                }
-            }
-            fclose($pipes[1]);
+            [$stdout, $timedOut] = $this->readUntilExit($process, $pipes[1]);
             $exitCode = proc_close($process);
-            $stderr = is_file($stderrFile) ? (string) file_get_contents($stderrFile) : '';
+            $stderr = (string) file_get_contents($stderrFile);
         } finally {
             if (is_file($stderrFile)) {
                 unlink($stderrFile);
@@ -287,15 +312,72 @@ class Server
         }
         // phpcs:enable Magento2.Security.InsecureFunction
 
-        $output = $this->cleanOutput($stdout);
-        $stderr = $this->cleanOutput($stderr);
-        if ($stderr !== '') {
-            $output .= ($output === '' ? '' : "\n\n") . "[stderr]\n" . $stderr;
-        }
+        $output = $this->joinOutput($this->cleanOutput($stdout), $this->cleanOutput($stderr));
         if ($timedOut) {
             return [124, $output . "\n\n[timed out after {$this->timeoutSeconds}s]"];
         }
         return [$exitCode, $output];
+    }
+
+    /**
+     * Read a process's stdout until it exits, killing it once the timeout passes
+     *
+     * @param resource $process
+     * @param resource $stdoutPipe
+     * @return array{0: string, 1: bool} stdout and whether it timed out
+     */
+    private function readUntilExit($process, $stdoutPipe): array
+    {
+        $stdout = '';
+        $timedOut = false;
+        $deadline = time() + $this->timeoutSeconds;
+        try {
+            stream_set_blocking($stdoutPipe, false);
+            while (!feof($stdoutPipe)) {
+                if (time() >= $deadline) {
+                    $timedOut = true;
+                    // phpcs:disable Magento2.Security.InsecureFunction -- kill our own child process on timeout
+                    proc_terminate($process, 9);
+                    // phpcs:enable Magento2.Security.InsecureFunction
+                    break;
+                }
+                $read = [$stdoutPipe];
+                $write = null;
+                $except = null;
+                if (stream_select($read, $write, $except, 1) > 0) {
+                    $stdout .= (string) fread($stdoutPipe, 65536);
+                }
+            }
+        } finally {
+            fclose($stdoutPipe);
+        }
+        return [$stdout, $timedOut];
+    }
+
+    /**
+     * Append stderr (if any) to stdout under a marker
+     *
+     * @param string $stdout
+     * @param string $stderr
+     * @return string
+     */
+    private function joinOutput(string $stdout, string $stderr): string
+    {
+        if ($stderr === '') {
+            return $stdout;
+        }
+        return ($stdout === '' ? '' : $stdout . "\n\n") . "[stderr]\n" . $stderr;
+    }
+
+    /**
+     * Return the value if it is an array, otherwise an empty array
+     *
+     * @param mixed $value
+     * @return array
+     */
+    private function arrayOrEmpty($value): array
+    {
+        return is_array($value) ? $value : [];
     }
 
     /**
